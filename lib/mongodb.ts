@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import type { Db } from "mongodb";
 
 const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB = process.env.MONGODB_DB;
 if (!MONGODB_URI) {
   throw new Error(
     "Please define the MONGODB_URI environment variable inside .env.local"
@@ -32,8 +33,41 @@ function stripUnsupportedMongoOptions(uri: string) {
   return keep.length ? `${base}?${keep.join("&")}` : base;
 }
 
+/**
+ * Ensure a db name is present in the URI. If missing and MONGODB_DB is set,
+ * append it before any query string. This aligns the app with seed scripts
+ * that may use MONGODB_DB when the URI has no db segment.
+ */
+function ensureDbInUri(uri: string, dbName?: string | null) {
+  if (!dbName) return uri;
+  try {
+    // split off query part
+    const qIdx = uri.indexOf("?");
+    const base = qIdx === -1 ? uri : uri.substring(0, qIdx);
+    const query = qIdx === -1 ? "" : uri.substring(qIdx);
+
+    // after protocol, check for path segment
+    const protoMatch = base.match(/^mongodb(\+srv)?:\/\//);
+    if (!protoMatch) return uri;
+    const proto = protoMatch[0];
+    const rest = base.substring(proto.length);
+
+    // rest is host[/db]
+    const slashIdx = rest.indexOf("/");
+    const hasDb = slashIdx !== -1 && rest.substring(slashIdx + 1).length > 0;
+    if (hasDb) return uri; // already has db
+
+    const hostPart = slashIdx === -1 ? rest : rest.substring(0, slashIdx);
+    const rebuilt = `${proto}${hostPart}/${dbName}${query}`;
+    return rebuilt;
+  } catch {
+    return uri;
+  }
+}
+
 /* Use cleaned URI to avoid unsupported option errors */
-const CLEANED_MONGODB_URI = stripUnsupportedMongoOptions(MONGODB_URI);
+const NORMALIZED_URI = ensureDbInUri(MONGODB_URI, MONGODB_DB);
+const CLEANED_MONGODB_URI = stripUnsupportedMongoOptions(NORMALIZED_URI);
 
 interface GlobalWithMongoose {
   mongoose?: {

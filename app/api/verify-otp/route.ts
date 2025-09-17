@@ -9,7 +9,6 @@ const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
 export async function POST(req: NextRequest) {
   try {
     const { email, otp, type = 'registration' } = await req.json();
-
     if (!email || !otp) {
       return NextResponse.json({ 
         message: "Email and OTP are required" 
