@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { BubbleButton } from "@/components/bubble-button"
+import { ImageSlideshow } from "@/components/image-slideshow"
 import { ArrowRight, Microscope, Waves, Brain, Fish, Anchor } from "lucide-react"
 
 interface HeroStats {
@@ -17,6 +18,15 @@ export function HeroSection() {
     conservationProjects: 0,
   })
   const [loading, setLoading] = useState(true)
+
+  // Deep sea images for slideshow
+  const deepSeaImages = [
+    "/deep-sea-images/slide1.jpg",
+    "/deep-sea-images/slide2.jpg", 
+    "/deep-sea-images/slide3.jpg",
+    "/deep-sea-images/slide4.jpg",
+    "/deep-sea-images/slide5.jpg",
+  ]
 
   useEffect(() => {
     fetchHeroStats()
@@ -148,7 +158,7 @@ export function HeroSection() {
               </BubbleButton>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 mb-8">
               <div className="flex items-center space-x-3 backdrop-blur-md bg-cyan-900/20 p-4 rounded-lg border border-cyan-400/20">
                 <div className="w-10 h-10 bg-cyan-500/20 rounded-lg flex items-center justify-center">
                   <Microscope className="h-5 w-5 text-cyan-400" />
@@ -186,35 +196,24 @@ export function HeroSection() {
           </div>
 
           <div className="relative">
-            <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden bg-gradient-to-br from-cyan-900/40 to-blue-950/60 border border-cyan-400/20 backdrop-blur-md">
-              {/* Deep sea visualization */}
-              <div className="absolute inset-0 bg-gradient-to-b from-blue-900/30 via-cyan-900/40 to-slate-950/60">
-                {/* Animated sea life */}
-                <div className="absolute inset-0">
-                  {[...Array(20)].map((_, i) => (
-                    <div
-                      key={i}
-                      className="absolute w-2 h-2 bg-cyan-400/60 rounded-full animate-pulse"
-                      style={{
-                        left: `${Math.random() * 100}%`,
-                        top: `${Math.random() * 100}%`,
-                        animationDelay: `${Math.random() * 2}s`,
-                      }}
-                    />
-                  ))}
-                </div>
+            <div className="relative w-full h-96 lg:h-[500px] rounded-2xl overflow-hidden border border-cyan-400/20 backdrop-blur-md">
+              {/* Image Slideshow */}
+              <ImageSlideshow 
+                images={deepSeaImages}
+                autoSlide={true}
+                slideInterval={5000}
+              />
 
-                {/* AI workflow visualization */}
-                <div className="absolute bottom-6 left-6 right-6">
-                  <div className="bg-slate-900/80 backdrop-blur-md rounded-lg p-4 border border-cyan-400/30">
-                    <h3 className="font-semibold text-white mb-2">AI Deep Sea Analysis Pipeline</h3>
-                    <div className="flex items-center justify-between text-sm text-cyan-200">
-                      <span>Data Collection</span>
-                      <ArrowRight className="h-4 w-4 text-cyan-400" />
-                      <span>AI Processing</span>
-                      <ArrowRight className="h-4 w-4 text-cyan-400" />
-                      <span>Conservation Insights</span>
-                    </div>
+              {/* AI workflow visualization overlay */}
+              <div className="absolute bottom-2 left-6 right-6 z-10">
+                <div className="bg-slate-900/90 backdrop-blur-md rounded-lg p-4 border border-cyan-400/30">
+                  <h3 className="font-semibold text-white mb-2">AI Deep Sea Analysis Pipeline</h3>
+                  <div className="flex items-center justify-between text-sm text-cyan-200">
+                    <span>Data Collection</span>
+                    <ArrowRight className="h-4 w-4 text-cyan-400" />
+                    <span>AI Processing</span>
+                    <ArrowRight className="h-4 w-4 text-cyan-400" />
+                    <span>Conservation Insights</span>
                   </div>
                 </div>
               </div>

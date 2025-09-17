@@ -1,12 +1,28 @@
 import nodemailer from 'nodemailer';
 
 // Debug environment variables
+const EMAIL_DISABLED = process.env.EMAIL_DISABLE === 'true';
+
 console.log('Email config check:', {
   HOST_EMAIL: process.env.HOST_EMAIL ? 'Set' : 'Not set',
   HOST_EMAIL_PASSWORD: process.env.HOST_EMAIL_PASSWORD ? 'Set' : 'Not set',
-  NODE_ENV: process.env.NODE_ENV
+  NODE_ENV: process.env.NODE_ENV,
+  EMAIL_DISABLED,
 });
 
+//use this in case it dont work
+/*
+let transporter: nodemailer.Transporter | null = null;
+if (!EMAIL_DISABLED) {
+  transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.HOST_EMAIL,
+      pass: process.env.HOST_EMAIL_PASSWORD,
+    },
+  });
+}
+*/
 // Use explicit SMTP if provided; otherwise fallback to simple Gmail service
 const transporter = process.env.SMTP_HOST
   ? nodemailer.createTransport({
@@ -27,15 +43,23 @@ const transporter = process.env.SMTP_HOST
     });
 
 // Test the transporter configuration
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('❌ SMTP configuration error:', error);
-  } else {
-    console.log('✅ SMTP server is ready to send emails');
-  }
-});
+if (!EMAIL_DISABLED && transporter) {
+  transporter.verify((error, success) => {
+    if (error) {
+      console.error('❌ SMTP configuration error:', error);
+    } else {
+      console.log('✅ SMTP server is ready to send emails');
+    }
+  });
+} else if (EMAIL_DISABLED) {
+  console.log('✉️  Email sending disabled (EMAIL_DISABLE=true). Skipping SMTP setup.');
+}
 
 export async function sendOTPEmail(email: string, otp: string, name?: string) {
+  if (EMAIL_DISABLED) {
+    console.log(`✉️ [DEV] EMAIL_DISABLE=true. Pretending to send OTP to ${email}: ${otp}`);
+    return { success: true };
+  }
   const mailOptions = {
     from: process.env.HOST_EMAIL,
     to: email,
@@ -80,6 +104,7 @@ export async function sendOTPEmail(email: string, otp: string, name?: string) {
   };
 
   try {
+    if (!transporter) throw new Error('SMTP transporter not configured');
     await transporter.sendMail(mailOptions);
     console.log(`✅ OTP email sent successfully to ${email}`);
     return { success: true };
@@ -90,6 +115,10 @@ export async function sendOTPEmail(email: string, otp: string, name?: string) {
 }
 
 export async function sendWelcomeEmail(email: string, name: string) {
+  if (EMAIL_DISABLED) {
+    console.log(`✉️ [DEV] EMAIL_DISABLE=true. Pretending to send Welcome email to ${email}`);
+    return { success: true };
+  }
   const mailOptions = {
     from: process.env.HOST_EMAIL,
     to: email,
@@ -139,6 +168,7 @@ export async function sendWelcomeEmail(email: string, name: string) {
   };
 
   try {
+    if (!transporter) throw new Error('SMTP transporter not configured');
     await transporter.sendMail(mailOptions);
     console.log(`✅ Welcome email sent successfully to ${email}`);
     return { success: true };

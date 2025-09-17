@@ -1,5 +1,8 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
+export const TEXT_MODEL_ID = "gemini-2.0-flash"
+export const VISION_MODEL_ID = process.env.GEMINI_VISION_MODEL_ID || "gemini-1.5-flash"
+
 const getGeminiClient = () => {
   if (!process.env.GEMINI_API_KEY) {
     throw new Error("Missing GEMINI_API_KEY environment variable")
@@ -10,13 +13,13 @@ const getGeminiClient = () => {
 // Get the Gemini 2.0 Flash model for text generation
 export const getGeminiFlashModel = () => {
   const genAI = getGeminiClient()
-  return genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+  return genAI.getGenerativeModel({ model: TEXT_MODEL_ID })
 }
 
 // Get the Gemini 2.0 Flash model for image analysis
 export const getGeminiFlashVisionModel = () => {
   const genAI = getGeminiClient()
-  return genAI.getGenerativeModel({ model: "gemini-2.0-flash" })
+  return genAI.getGenerativeModel({ model: VISION_MODEL_ID })
 }
 
 export interface SpeciesIdentificationResult {

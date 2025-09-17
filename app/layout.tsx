@@ -7,10 +7,13 @@ import { Suspense } from "react"
 import { BubbleCursor } from "@/components/bubble-cursor"
 import { NavigationWrapper } from "@/components/navigation-wrapper"
 import { FloatingUpgradeButton } from "@/components/floating-upgrade-button"
+
+import { DeepSeaBackground } from "@/components/deep-sea-background"
+import { Chatbot } from "@/components/chatbot"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "AI-Driven Deep Sea Biodiversity Platform",
+  title: "OCEANOVA",
   description:
     "Advanced AI-powered platform for deep-sea marine species identification, environmental threat assessment, water quality monitoring, and conservation insights using cutting-edge machine learning and environmental DNA analysis.",
   keywords:
@@ -32,11 +35,15 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+        <DeepSeaBackground />
         <BubbleCursor />
         <Suspense fallback={<div>Loading...</div>}>
           <NavigationWrapper>{children}</NavigationWrapper>
         </Suspense>
         <FloatingUpgradeButton />
+        <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+
+        <Chatbot />
         <Analytics />
       </body>
     </html>

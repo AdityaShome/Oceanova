@@ -53,7 +53,6 @@ export function GeneSequenceAnalyzer() {
   const [expandedRows, setExpandedRows] = useState<Record<number, boolean>>({})
 
   const formatKey = (key: string) => {
-    // prettify snake_case keys for display
     return key
       .replace(/_/g, ' ')
       .replace(/\b([a-z])/g, (m) => m.toUpperCase())
@@ -187,6 +186,7 @@ export function GeneSequenceAnalyzer() {
     setResults(null)
 
     try {
+      // Use the SIH endpoint as it appears to be the more complete implementation
       const response = await fetch('/api/ml/sih', {
         method: 'POST',
         headers: {

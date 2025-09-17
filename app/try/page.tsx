@@ -7,7 +7,9 @@ export default function TryPage() {
 			<VideoBackground />
 			
 			{/* Animated header with floating data metrics */}
-			<div className="absolute top-0 left-0 right-0 h-48 sm:h-56 z-20">
+
+			<div className="absolute top-0 left-0 right-0 h-32 z-20">
+
 				<div className="relative w-full h-full">
 					{/* Flowing data streams */}
 					<div className="absolute inset-0 overflow-hidden">
@@ -25,92 +27,43 @@ export default function TryPage() {
 								}}
 							/>
 						))}
+
 					</div>
 
-					{/* Header content with proper flexbox layout */}
-					<div className="relative w-full h-full px-4 sm:px-6 lg:px-8">
-						{/* Top row - Metrics and Ocean Depth */}
-						<div className="flex justify-between items-start pt-2 sm:pt-4">
-							{/* Left side - Research metrics */}
-							<div className="flex flex-wrap gap-2 sm:gap-3 lg:gap-4 max-w-xs sm:max-w-sm lg:max-w-md">
-								{[
-									{ label: "Active Sensors", value: "2,847", color: "cyan" },
-									{ label: "Species Detected", value: "1,293", color: "blue" },
-									{ label: "Data Points", value: "847K", color: "teal" },
-								].map((metric, i) => (
-									<div key={metric.label} className="relative group" style={{ animationDelay: `${i * 0.3}s` }}>
-										<div className={`absolute inset-0 bg-${metric.color}-400/10 rounded-lg blur-xl animate-pulse`} />
-										<div className="relative bg-slate-900/40 backdrop-blur-sm border border-cyan-400/20 rounded-lg px-2 sm:px-3 py-1 sm:py-2">
-											<div className={`text-xs text-${metric.color}-300 font-medium mb-0.5 sm:mb-1`}>{metric.label}</div>
-											<div className={`text-sm sm:text-base font-bold text-${metric.color}-100 animate-pulse`}>{metric.value}</div>
-											<div
-												className={`absolute -top-0.5 sm:-top-1 -right-0.5 sm:-right-1 w-1.5 h-1.5 sm:w-2 sm:h-2 bg-${metric.color}-400 rounded-full animate-ping`}
-											/>
-										</div>
-									</div>
-								))}
-							</div>
-
-							{/* Right side - Ocean depth */}
-							<div className="max-w-xs sm:max-w-sm">
-								<div className="relative bg-slate-900/40 backdrop-blur-sm border border-blue-400/20 rounded-lg px-2 sm:px-3 py-2 sm:py-3">
-									<div className="text-xs sm:text-sm text-blue-300 font-medium mb-1 sm:mb-2">Ocean Depth</div>
-									<div className="flex items-center space-x-2 sm:space-x-3">
-										<div className="relative w-1.5 sm:w-2 h-12 sm:h-16 bg-slate-700 rounded-full overflow-hidden">
-											<div
-												className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-pulse"
-												style={{ height: "75%", animationDuration: "3s" }}
-											/>
-										</div>
-										<div>
-											<div className="text-sm sm:text-base font-bold text-blue-100">3,847m</div>
-											<div className="text-xs text-blue-300">Abyssal Zone</div>
-										</div>
-									</div>
+					{/* Floating research metrics */}
+					<div className="absolute top-4 left-8 flex space-x-8">
+						{[
+							{ label: "Active Sensors", value: "2,847", color: "cyan" },
+							{ label: "Species Detected", value: "1,293", color: "blue" },
+							{ label: "Data Points", value: "847K", color: "teal" },
+						].map((metric, i) => (
+							<div key={metric.label} className="relative group" style={{ animationDelay: `${i * 0.3}s` }}>
+								<div className={`absolute inset-0 bg-${metric.color}-400/10 rounded-lg blur-xl animate-pulse`} />
+								<div className="relative bg-slate-900/40 backdrop-blur-sm border border-cyan-400/20 rounded-lg px-4 py-2">
+									<div className={`text-xs text-${metric.color}-300 font-medium mb-1`}>{metric.label}</div>
+									<div className={`text-lg font-bold text-${metric.color}-100 animate-pulse`}>{metric.value}</div>
+									<div
+										className={`absolute -top-1 -right-1 w-2 h-2 bg-${metric.color}-400 rounded-full animate-ping`}
+									/>
 								</div>
 							</div>
-						</div>
+						))}
+					</div>
 
-						{/* Bottom row - System status and Environmental data */}
-						<div className="flex justify-between items-start pt-4 sm:pt-6">
-							{/* Left side - System status */}
-							<div className="max-w-xs sm:max-w-sm">
-								<div className="space-y-1 sm:space-y-2">
-									{[
-										{ name: "AI Processing", status: "Active", color: "green" },
-										{ name: "Data Collection", status: "Online", color: "blue" },
-										{ name: "Analysis Engine", status: "Running", color: "cyan" },
-									].map((system, i) => (
-										<div key={system.name} className="flex items-center space-x-1 sm:space-x-2 text-xs">
-											<div
-												className={`w-1.5 h-1.5 sm:w-2 sm:h-2 bg-${system.color}-400 rounded-full animate-pulse`}
-												style={{ animationDelay: `${i * 0.5}s` }}
-											/>
-											<span className="text-slate-300 font-medium text-xs">{system.name}</span>
-											<span className={`text-${system.color}-300 text-xs`}>{system.status}</span>
-										</div>
-									))}
+					{/* Ocean depth indicator */}
+					<div className="absolute top-4 right-8">
+						<div className="relative bg-slate-900/40 backdrop-blur-sm border border-blue-400/20 rounded-lg px-4 py-3">
+							<div className="text-xs text-blue-300 font-medium mb-2">Ocean Depth</div>
+							<div className="flex items-center space-x-3">
+								<div className="relative w-2 h-16 bg-slate-700 rounded-full overflow-hidden">
+									<div
+										className="absolute bottom-0 w-full bg-gradient-to-t from-blue-500 to-cyan-400 rounded-full animate-pulse"
+										style={{ height: "75%", animationDuration: "3s" }}
+									/>
 								</div>
-							</div>
-
-							{/* Right side - Environmental data */}
-							<div className="max-w-xs sm:max-w-sm">
-								<div className="bg-slate-900/30 backdrop-blur-sm border border-teal-400/20 rounded-lg p-2 sm:p-3">
-									<div className="text-xs text-teal-300 font-medium mb-1 sm:mb-2">Environmental Data</div>
-									<div className="space-y-0.5 sm:space-y-1 text-xs">
-										<div className="flex justify-between">
-											<span className="text-slate-300">Temperature:</span>
-											<span className="text-teal-200 animate-pulse">2.1°C</span>
-										</div>
-										<div className="flex justify-between">
-											<span className="text-slate-300">Pressure:</span>
-											<span className="text-blue-200 animate-pulse">384 atm</span>
-										</div>
-										<div className="flex justify-between">
-											<span className="text-slate-300">Salinity:</span>
-											<span className="text-cyan-200 animate-pulse">34.7 ppt</span>
-										</div>
-									</div>
+								<div>
+									<div className="text-lg font-bold text-blue-100">3,847m</div>
+									<div className="text-xs text-blue-300">Abyssal Zone</div>
 								</div>
 							</div>
 						</div>
@@ -195,6 +148,46 @@ export default function TryPage() {
 				))}
 			</div>
 
+			{/* System status indicators */}
+			<div className="absolute top-20 left-4 z-20">
+				<div className="space-y-2">
+					{[
+						{ name: "AI Processing", status: "Active", color: "green" },
+						{ name: "Data Collection", status: "Online", color: "blue" },
+						{ name: "Analysis Engine", status: "Running", color: "cyan" },
+					].map((system, i) => (
+						<div key={system.name} className="flex items-center space-x-2 text-xs">
+							<div
+								className={`w-2 h-2 bg-${system.color}-400 rounded-full animate-pulse`}
+								style={{ animationDelay: `${i * 0.5}s` }}
+							/>
+							<span className="text-slate-300 font-medium">{system.name}</span>
+							<span className={`text-${system.color}-300`}>{system.status}</span>
+						</div>
+					))}
+				</div>
+			</div>
+
+			{/* Environmental readings */}
+			<div className="absolute top-20 right-4 z-20">
+				<div className="bg-slate-900/30 backdrop-blur-sm border border-teal-400/20 rounded-lg p-3">
+					<div className="text-xs text-teal-300 font-medium mb-2">Environmental Data</div>
+					<div className="space-y-1 text-xs">
+						<div className="flex justify-between">
+							<span className="text-slate-300">Temperature:</span>
+							<span className="text-teal-200 animate-pulse">2.1°C</span>
+						</div>
+						<div className="flex justify-between">
+							<span className="text-slate-300">Pressure:</span>
+							<span className="text-blue-200 animate-pulse">384 atm</span>
+						</div>
+						<div className="flex justify-between">
+							<span className="text-slate-300">Salinity:</span>
+							<span className="text-cyan-200 animate-pulse">34.7 ppt</span>
+						</div>
+					</div>
+				</div>
+			</div>
 
 			{/* Deep ocean current effect */}
 			<div className="absolute inset-0 opacity-30">
@@ -289,33 +282,31 @@ export default function TryPage() {
 				</svg>
 			</div>
 
-			{/* Main content - optimized for laptop screens */}
-			<div className="relative z-30 flex min-h-screen items-center justify-center px-4 sm:px-6 lg:px-8">
-				<div className="text-center max-w-6xl mx-auto">
-					{/* Header section - more compact for laptop */}
-					<div className="mb-8 sm:mb-10 flex items-center justify-center">
-						<div className="relative flex items-center space-x-3 sm:space-x-4">
+			{/* Main content */}
+			<div className="relative z-30 flex min-h-screen items-center justify-center px-6">
+				<div className="text-center max-w-5xl mx-auto">
+					<div className="mb-12 flex items-center justify-center">
+						<div className="relative flex items-center space-x-4">
 							<div className="relative">
-								<div className="absolute inset-0 w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 blur-lg opacity-60 animate-pulse"></div>
-								<div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center shadow-2xl">
+								<div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 blur-lg opacity-60 animate-pulse"></div>
+								<div className="relative w-16 h-16 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 flex items-center justify-center shadow-2xl">
 									<div
-										className="w-6 h-6 sm:w-8 sm:h-8 rounded-full bg-gradient-to-r from-white/30 to-white/10 backdrop-blur-sm animate-spin"
+										className="w-8 h-8 rounded-full bg-gradient-to-r from-white/30 to-white/10 backdrop-blur-sm animate-spin"
 										style={{ animationDuration: "8s" }}
 									></div>
 								</div>
 							</div>
 							<div className="text-left">
-								<h3 className="text-lg sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300 animate-pulse">
+								<h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-300 animate-pulse">
 									AI-Driven
 								</h3>
-								<p className="text-sm sm:text-lg text-cyan-200/90 font-medium">Biodiversity</p>
+								<p className="text-lg text-cyan-200/90 font-medium">Biodiversity</p>
 							</div>
 						</div>
 					</div>
 
-					{/* Main title - responsive sizing for laptop screens */}
-					<div className="mb-6 sm:mb-8 relative z-20">
-						<h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-cyan-200 mb-1 sm:mb-2 leading-tight tracking-tight drop-shadow-lg">
+					<div className="mb-8 relative z-20">
+						<h1 className="text-6xl md:text-7xl lg:text-8xl font-black text-cyan-200 mb-2 leading-none tracking-tight drop-shadow-lg">
 							<span className="inline-block animate-pulse" style={{ animationDelay: "0s" }}>
 								Deep
 							</span>{" "}
@@ -323,12 +314,12 @@ export default function TryPage() {
 								Sea
 							</span>
 						</h1>
-						<h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-blue-300 mb-1 sm:mb-2 leading-tight drop-shadow-lg">
+						<h2 className="text-5xl md:text-6xl lg:text-7xl font-bold text-blue-300 mb-2 leading-none drop-shadow-lg">
 							<span className="inline-block animate-pulse" style={{ animationDelay: "0.4s" }}>
 								Biodiversity
 							</span>
 						</h2>
-						<h3 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-light text-teal-300 leading-tight drop-shadow-lg">
+						<h3 className="text-3xl md:text-4xl lg:text-5xl font-light text-teal-300 leading-tight drop-shadow-lg">
 							<span className="inline-block animate-pulse" style={{ animationDelay: "0.6s" }}>
 								Research
 							</span>{" "}
@@ -338,10 +329,9 @@ export default function TryPage() {
 						</h3>
 					</div>
 
-					{/* Description - optimized for laptop reading */}
-					<div className="relative mb-8 sm:mb-10">
+					<div className="relative mb-6">
 						<div className="absolute inset-0 bg-gradient-to-r from-transparent via-cyan-500/5 to-transparent blur-xl"></div>
-						<p className="relative text-lg sm:text-xl md:text-2xl lg:text-3xl text-blue-100/95 max-w-5xl mx-auto leading-relaxed font-light text-balance px-2">
+						<p className="relative text-2xl md:text-3xl text-blue-100/95 max-w-4xl mx-auto leading-relaxed font-light text-balance">
 							Revolutionizing marine conservation through{" "}
 							<span className="text-cyan-300 font-medium">advanced AI-powered</span> species identification,
 							environmental monitoring, and <span className="text-teal-300 font-medium">predictive analytics</span> for
@@ -349,16 +339,17 @@ export default function TryPage() {
 						</p>
 					</div>
 
-					{/* Feature cards - optimized for laptop screens */}
-					<div className="grid gap-4 sm:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 mb-12 sm:mb-16">
+					{/* Your original feature cards with enhanced styling */}
+					<div className="grid gap-6 md:grid-cols-2 mb-16">
 						<div className="relative group">
 							<div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-xl blur-xl animate-pulse"></div>
-							<div className="relative rounded-xl border border-cyan-400/20 bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6 shadow-sm hover:border-cyan-400/40 transition-all duration-300">
-								<div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-									<div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-cyan-400 animate-pulse"></div>
-									<h2 className="text-base sm:text-lg lg:text-xl font-semibold text-cyan-100">Species Identification</h2>
+							<div className="relative rounded-xl border border-cyan-400/20 bg-slate-900/40 backdrop-blur-sm p-6 shadow-sm hover:border-cyan-400/40 transition-all duration-300">
+								<div className="flex items-center space-x-3 mb-3">
+									<div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></div>
+									<h2 className="text-xl font-semibold text-cyan-100">Species Identification</h2>
 								</div>
-								<p className="text-xs sm:text-sm text-cyan-200/80 leading-relaxed">
+								<p className="text-sm text-cyan-200/80">
+
 									Upload images to identify species using computer vision models and access
 									confidence scores.
 								</p>
@@ -367,12 +358,14 @@ export default function TryPage() {
 						
 						<div className="relative group">
 							<div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-teal-400/10 rounded-xl blur-xl animate-pulse"></div>
-							<div className="relative rounded-xl border border-blue-400/20 bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6 shadow-sm hover:border-blue-400/40 transition-all duration-300">
-								<div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-									<div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-blue-400 animate-pulse"></div>
-									<h2 className="text-base sm:text-lg lg:text-xl font-semibold text-blue-100">Conservation Insights</h2>
+
+							<div className="relative rounded-xl border border-blue-400/20 bg-slate-900/40 backdrop-blur-sm p-6 shadow-sm hover:border-blue-400/40 transition-all duration-300">
+								<div className="flex items-center space-x-3 mb-3">
+									<div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse"></div>
+									<h2 className="text-xl font-semibold text-blue-100">Conservation Insights</h2>
 								</div>
-								<p className="text-xs sm:text-sm text-blue-200/80 leading-relaxed">
+								<p className="text-sm text-blue-200/80">
+
 									AI-assisted recommendations for conservation strategies driven by
 									spatial and temporal data.
 								</p>
@@ -381,12 +374,14 @@ export default function TryPage() {
 						
 						<div className="relative group">
 							<div className="absolute inset-0 bg-gradient-to-r from-teal-400/10 to-cyan-400/10 rounded-xl blur-xl animate-pulse"></div>
-							<div className="relative rounded-xl border border-teal-400/20 bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6 shadow-sm hover:border-teal-400/40 transition-all duration-300">
-								<div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-									<div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-teal-400 animate-pulse"></div>
-									<h2 className="text-base sm:text-lg lg:text-xl font-semibold text-teal-100">Water Quality Analysis</h2>
+
+							<div className="relative rounded-xl border border-teal-400/20 bg-slate-900/40 backdrop-blur-sm p-6 shadow-sm hover:border-teal-400/40 transition-all duration-300">
+								<div className="flex items-center space-x-3 mb-3">
+									<div className="w-3 h-3 rounded-full bg-teal-400 animate-pulse"></div>
+									<h2 className="text-xl font-semibold text-teal-100">Water Quality Analysis</h2>
 								</div>
-								<p className="text-xs sm:text-sm text-teal-200/80 leading-relaxed">
+								<p className="text-sm text-teal-200/80">
+
 									Visualize water quality metrics and hotspots with interactive maps and
 									model-based predictions.
 								</p>
@@ -395,12 +390,14 @@ export default function TryPage() {
 						
 						<div className="relative group">
 							<div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-xl blur-xl animate-pulse"></div>
-							<div className="relative rounded-xl border border-cyan-400/20 bg-slate-900/40 backdrop-blur-sm p-4 sm:p-6 shadow-sm hover:border-cyan-400/40 transition-all duration-300">
-								<div className="flex items-center space-x-2 sm:space-x-3 mb-2 sm:mb-3">
-									<div className="w-2 h-2 sm:w-3 sm:h-3 rounded-full bg-cyan-400 animate-pulse"></div>
-									<h2 className="text-base sm:text-lg lg:text-xl font-semibold text-cyan-100">Gene Sequence Analysis</h2>
+
+							<div className="relative rounded-xl border border-cyan-400/20 bg-slate-900/40 backdrop-blur-sm p-6 shadow-sm hover:border-cyan-400/40 transition-all duration-300">
+								<div className="flex items-center space-x-3 mb-3">
+									<div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></div>
+									<h2 className="text-xl font-semibold text-cyan-100">Gene Sequence Analysis</h2>
 								</div>
-								<p className="text-xs sm:text-sm text-cyan-200/80 leading-relaxed">
+								<p className="text-sm text-cyan-200/80">
+
 									Analyze genetic sequences to predict functional annotations and
 									potential threats.
 								</p>
@@ -408,10 +405,11 @@ export default function TryPage() {
 						</div>
 					</div>
 
-					{/* CTA Button - optimized for laptop screens */}
-					<div className="relative mb-12 sm:mb-16">
+
+					<div className="relative mb-16">
 						{/* Outer glow ring */}
-						<div className="absolute inset-0 -m-2 sm:-m-4">
+						<div className="absolute inset-0 -m-4">
+
 							<div
 								className="w-full h-full rounded-full bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-teal-400/20 blur-2xl animate-pulse"
 								style={{ animationDuration: "3s" }}
@@ -419,24 +417,30 @@ export default function TryPage() {
 						</div>
 
 						{/* Middle glow */}
-						<div className="absolute inset-0 -m-1 sm:-m-2">
+
+						<div className="absolute inset-0 -m-2">
+
 							<div
 								className="w-full h-full rounded-full bg-gradient-to-r from-cyan-400/30 to-blue-500/30 blur-xl animate-pulse"
 								style={{ animationDuration: "2s", animationDelay: "0.5s" }}
 							></div>
 						</div>
 
-						{/* Button - responsive sizing for laptop */}
+
+						{/* Button - keeping your original link */}
 						<Link
 							href="/auth/login"
-							className="relative inline-flex items-center px-8 sm:px-12 lg:px-16 py-4 sm:py-5 lg:py-6 text-base sm:text-lg lg:text-xl font-bold text-white bg-gradient-to-r from-cyan-500 via-blue-600 to-teal-500 rounded-full shadow-2xl hover:from-cyan-400 hover:via-blue-500 hover:to-teal-400 transition-all duration-500 transform hover:scale-105 sm:hover:scale-110 hover:shadow-cyan-500/30 focus:outline-none focus:ring-4 focus:ring-cyan-500/50 group overflow-hidden"
+							className="relative inline-flex items-center px-16 py-6 text-xl font-bold text-white bg-gradient-to-r from-cyan-500 via-blue-600 to-teal-500 rounded-full shadow-2xl hover:from-cyan-400 hover:via-blue-500 hover:to-teal-400 transition-all duration-500 transform hover:scale-110 hover:shadow-cyan-500/30 focus:outline-none focus:ring-4 focus:ring-cyan-500/50 group overflow-hidden"
+
 						>
 							{/* Button inner glow */}
 							<div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
-							<span className="relative mr-2 sm:mr-4 tracking-wide">Get started</span>
+
+							<span className="relative mr-4 tracking-wide">Get started</span>
 							<svg
-								className="relative w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 transition-transform duration-300 group-hover:translate-x-1 sm:group-hover:translate-x-2 group-hover:scale-110"
+								className="relative w-6 h-6 transition-transform duration-300 group-hover:translate-x-2 group-hover:scale-110"
+
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Comprehensive Ocean Data Explorer</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+  <a class="home-btn" href="/">
+    <i class="fas fa-home"></i> Home
+  </a>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-water"></i> Comprehensive Ocean Data Explorer</h1>
+      <p>Explore ocean water bodies with detailed information about temperature, salinity, plankton, and more</p>
+    </header>
+
+    <div class="input-section">
+      <div class="form-container">
+        <h2><i class="fas fa-map-marker-alt"></i> Location & Date</h2>
+        
+        <!-- Location Input Tabs -->
+        <div class="location-tabs">
+          <button class="tab-btn active" onclick="switchTab('place')">
+            <i class="fas fa-map-marker-alt"></i> Place Name
+          </button>
+          <button class="tab-btn" onclick="switchTab('coordinates')">
+            <i class="fas fa-crosshairs"></i> Coordinates
+          </button>
+        </div>
+
+        <!-- Place Name Input -->
+        <div id="place-tab" class="tab-content active">
+          <div class="form">
+            <div class="input-group full-width">
+              <label for="placeName">Search for a place</label>
+              <div class="search-container">
+                <input type="text" id="placeName" placeholder="e.g., Miami Beach, Mediterranean Sea, North Sea..." 
+                       autocomplete="off" oninput="searchPlaces()" onkeydown="handlePlaceKeydown(event)">
+                <div id="placeSuggestions" class="suggestions"></div>
+              </div>
+            </div>
+            <div class="input-group">
+              <label for="date1">Date</label>
+              <input type="date" id="date1">
+            </div>
+            <button onclick="fetchDataByPlace()" class="fetch-btn">
+              <i class="fas fa-search"></i> Get Ocean Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Coordinates Input -->
+        <div id="coordinates-tab" class="tab-content">
+          <div class="form">
+            <div class="input-group">
+              <label for="lat">Latitude</label>
+              <input type="number" id="lat" placeholder="e.g., 25.7617" step="0.01" min="-90" max="90">
+            </div>
+            <div class="input-group">
+              <label for="lon">Longitude</label>
+              <input type="number" id="lon" placeholder="e.g., -80.1918" step="0.01" min="-180" max="180">
+            </div>
+            <div class="input-group">
+              <label for="date2">Date</label>
+              <input type="date" id="date2">
+            </div>
+            <button onclick="fetchData()" class="fetch-btn">
+              <i class="fas fa-search"></i> Get Ocean Data
+            </button>
+          </div>
+        </div>
+
+        <!-- Popular Places -->
+        <div class="popular-places">
+          <h3><i class="fas fa-star"></i> Popular Ocean Locations</h3>
+          <div id="popularPlaces" class="popular-places-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading" class="loading hidden">
+      <div class="spinner"></div>
+      <p>Fetching ocean data...</p>
+    </div>
+
+    <div id="result" class="result-container"></div>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

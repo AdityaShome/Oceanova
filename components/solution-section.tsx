@@ -23,7 +23,7 @@ export function SolutionSection() {
     },
     {
       icon: TrendingUp,
-      title: "Population Trends",
+      title: "Abundance",
       description: "Real-time monitoring and predictive modeling of marine biodiversity",
       features: ["Trend analysis", "Population modeling", "Risk assessment"],
       href: "/solutions/population-trends",
@@ -31,7 +31,7 @@ export function SolutionSection() {
     {
       icon: Shield,
       title: "Conservation Insights",
-      description: "AI-driven recommendations for marine ecosystem preservation",
+      description: "OCEANOVA",
       features: ["Threat detection", "Action plans", "Impact assessment"],
       href: "/solutions/conservation-insights",
     },

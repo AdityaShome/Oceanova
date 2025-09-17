@@ -1,0 +1,10 @@
+flask
+flask-cors
+xarray
+copernicusmarine
+requests
+netcdf4
+dask
+numpy
+pandas
+python-dotenv

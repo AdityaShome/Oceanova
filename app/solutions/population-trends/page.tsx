@@ -1,192 +1,447 @@
-import { HomeButton } from "@/components/home-button"
-import { BubbleCursor } from "@/components/bubble-cursor"
-import { GlassmorphismCard } from "@/components/glassmorphism-card"
-import { BubbleButton } from "@/components/bubble-button"
-import { GeneSequenceAnalyzer } from "@/components/gene-sequence-analyzer"
-import { TrendingUp, BarChart3, Activity, AlertTriangle, Target, Waves, Dna } from "lucide-react"
-import Link from "next/link"
+"use client"
+
+import { useState, useEffect, useRef } from "react"
+import { Card } from "@/components/ui/card"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { Search, MapPin, Fish, Waves, Loader2, Activity, Thermometer, Gauge, Globe } from "lucide-react"
+import dynamic from "next/dynamic"
+import * as XLSX from "xlsx"
+
+// Dynamically import the map component to avoid SSR issues
+const MarineMap = dynamic(() => import("@/components/marine-map"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[600px] bg-slate-800 animate-pulse rounded-lg flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="h-8 w-8 animate-spin mx-auto mb-2 text-blue-400" />
+        <p className="text-slate-300">Loading deep sea research map...</p>
+      </div>
+    </div>
+  ),
+})
+
+interface SpeciesData {
+  id: string
+  species: string
+  scientificName: string
+  count: number
+  latitude: number
+  longitude: number
+  depth: number
+  temperature: number
+  lastUpdated: string
+}
+
+interface SearchSuggestion {
+  species: string
+  scientificName: string
+  commonNames: string[]
+}
 
 export default function PopulationTrendsPage() {
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-emerald-900 via-teal-900 to-cyan-900 relative overflow-hidden">
-      <BubbleCursor />
-      <HomeButton />
+  const [searchQuery, setSearchQuery] = useState("")
+  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
+  const [selectedSpecies, setSelectedSpecies] = useState<string | null>(null)
+  const [speciesData, setSpeciesData] = useState<SpeciesData[]>([])
+  const [loading, setLoading] = useState(false)
+  const [showSuggestions, setShowSuggestions] = useState(false)
+  const [totalSpeciesCount, setTotalSpeciesCount] = useState(0)
+  const [avgDepth, setAvgDepth] = useState(0)
+  const [avgTemp, setAvgTemp] = useState(0)
+  const [hasSearched, setHasSearched] = useState(false)
+  const [currentTime, setCurrentTime] = useState("")
+  const searchTimeoutRef = useRef<NodeJS.Timeout>()
 
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute top-20 right-20 w-36 h-36 bg-emerald-500/10 rounded-full blur-xl animate-pulse"></div>
-        <div className="absolute bottom-40 left-16 w-28 h-28 bg-teal-500/10 rounded-full blur-xl animate-pulse delay-1000"></div>
-        <div className="absolute top-1/3 left-1/4 w-32 h-32 bg-cyan-500/10 rounded-full blur-xl animate-pulse delay-2000"></div>
+  const fetchSpeciesData = async (species?: string) => {
+    setLoading(true)
+    try {
+      const name = species?.trim()
+      if (!name) {
+        setSpeciesData([])
+        setTotalSpeciesCount(0)
+        setAvgDepth(0)
+        setAvgTemp(0)
+        return
+      }
+
+      const response = await fetch("/api/obis-species", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scientificName: name }),
+      })
+
+      if (!response.ok) throw new Error(`OBIS route failed ${response.status}`)
+      const data = await response.json()
+
+      const processedData: SpeciesData[] = (data.observations || []).map((o: any) => ({
+        id: o.id,
+        species: o.scientificName,
+        scientificName: o.scientificName,
+        count: 1,
+        latitude: Number(o.latitude),
+        longitude: Number(o.longitude),
+        depth: Number(o.depth) || 0,
+        temperature: typeof o.temperature === "number" ? o.temperature : 0,
+        lastUpdated: o.lastUpdated || new Date().toISOString(),
+      }))
+
+      setSpeciesData(processedData)
+      setTotalSpeciesCount(new Set(processedData.map((d) => d.scientificName)).size)
+      setAvgDepth(data.summary?.avgDepth || 0)
+      setAvgTemp(data.summary?.avgTemp ?? 0)
+    } catch (error) {
+      setSpeciesData([])
+      setTotalSpeciesCount(0)
+      setAvgDepth(0)
+      setAvgTemp(0)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const getSearchSuggestions = async (query: string) => {
+    if (!query.trim() || query.length < 2) {
+      setSuggestions([])
+      return
+    }
+
+    try {
+      const response = await fetch("/api/search-suggestions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query }),
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        setSuggestions(data.suggestions || [])
+      } else {
+        setSuggestions([])
+      }
+    } catch {
+      setSuggestions([])
+    }
+  }
+
+  const handleExportData = () => {
+    if (speciesData.length === 0) {
+      alert("No species data available to export")
+      return
+    }
+
+    const exportData = speciesData.map((species, index) => ({
+      "Record ID": index + 1,
+      "Species Name": species.species,
+      "Scientific Name": species.scientificName,
+      "Species Count": species.count,
+      "Latitude": species.latitude.toFixed(6),
+      "Longitude": species.longitude.toFixed(6),
+      "Depth (meters)": species.depth,
+      "Temperature (°C)": species.temperature.toFixed(2),
+      "Last Updated": new Date(species.lastUpdated).toLocaleDateString(),
+      "Depth Zone": species.depth > 4000 ? "Hadal" : 
+                   species.depth > 2000 ? "Abyssal" : 
+                   species.depth > 1000 ? "Bathyal" : "Mesopelagic"
+    }))
+
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(exportData)
+
+    const colWidths = [
+      { wch: 10 },
+      { wch: 25 },
+      { wch: 30 },
+      { wch: 15 },
+      { wch: 12 },
+      { wch: 12 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 15 }
+    ]
+    ;(ws as any)['!cols'] = colWidths
+
+    XLSX.utils.book_append_sheet(wb, ws, "Deep Sea Species Data")
+
+    const timestamp = new Date().toISOString().split('T')[0]
+    const filename = `deep_sea_species_${selectedSpecies || 'all'}_${timestamp}.xlsx`
+
+    XLSX.writeFile(wb, filename)
+  }
+
+  const handleSearchChange = (value: string) => {
+    setSearchQuery(value)
+    setShowSuggestions(true)
+
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      getSearchSuggestions(value)
+    }, 300)
+  }
+
+  const handleSpeciesSelect = (species: string) => {
+    setSelectedSpecies(species)
+    setSearchQuery(species)
+    setShowSuggestions(false)
+    setHasSearched(true)
+    fetchSpeciesData(species)
+  }
+
+  // Handle manual search button click or Enter key
+  const handleManualSearch = () => {
+    const query = searchQuery.trim()
+    if (query.length >= 2) {
+      setSelectedSpecies(query)
+      setShowSuggestions(false)
+      setHasSearched(true)
+      fetchSpeciesData(query)
+    }
+  }
+
+  // Handle Enter key press in search input
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleManualSearch()
+    }
+  }
+
+  useEffect(() => {
+    const updateTime = () => {
+      setCurrentTime(new Date().toLocaleTimeString())
+    }
+    updateTime()
+    const interval = setInterval(updateTime, 1000)
+    return () => clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const handleClickOutside = () => setShowSuggestions(false)
+    document.addEventListener("click", handleClickOutside)
+    return () => document.removeEventListener("click", handleClickOutside)
+  }, [])
+
+  return (
+    <div className="min-h-screen bg-slate-900">
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-blue-900 text-white shadow-xl">
+        <div className="container mx-auto px-6 py-8">
+          <div className="flex items-center gap-4 mb-6">
+            <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl border border-white/30">
+              <Waves className="h-8 w-8 text-white" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-balance mb-2">Deep Sea Research Institute</h1>
+              <p className="text-xl text-blue-100 text-pretty">Real-time Marine Species Abundance Monitoring System</p>
+            </div>
+          </div>
+
+          <div className="relative max-w-2xl">
+            <div className="relative flex gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-slate-400" />
+                <Input
+                  placeholder="Search deep sea species (e.g., vampire squid, anglerfish, giant tube worm)..."
+                  value={searchQuery}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                  onKeyPress={handleKeyPress}
+                  className="pl-12 pr-4 py-3 text-lg bg-white border-0 shadow-lg text-slate-900 placeholder:text-slate-500"
+                />
+                {loading && (
+                  <Loader2 className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 animate-spin text-blue-600" />
+                )}
+              </div>
+              <Button
+                onClick={handleManualSearch}
+                disabled={loading || searchQuery.trim().length < 2}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Search"
+                )}
+              </Button>
+            </div>
+
+            {showSuggestions && suggestions.length > 0 && (
+              <Card className="absolute top-full left-0 right-0 mt-2 z-50 max-h-80 overflow-y-auto shadow-xl border-0 bg-white">
+                <div className="p-2">
+                  {suggestions.map((suggestion, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleSpeciesSelect(suggestion.species)}
+                      className="w-full text-left p-3 rounded-lg transition-colors hover:bg-blue-50 text-slate-900"
+                    >
+                      <div className="font-semibold text-slate-900">{suggestion.species}</div>
+                      <div className="text-sm text-slate-600">{suggestion.commonNames.join(", ")}</div>
+                    </button>
+                  ))}
+                </div>
+              </Card>
+            )}
+            
+            {/* Show search hint when user types but no suggestions */}
+            {searchQuery.length >= 2 && suggestions.length === 0 && !loading && (
+              <div className="absolute top-full left-0 right-0 mt-2 z-50">
+                <Card className="p-3 bg-blue-50 border border-blue-200 shadow-lg">
+                  <div className="flex items-center gap-2 text-blue-800">
+                    <Search className="h-4 w-4" />
+                    <span className="text-sm font-medium">
+                      No suggestions found. Press Enter or click Search to find locations for "{searchQuery}"
+                    </span>
+                  </div>
+                </Card>
+              </div>
+            )}
+          </div>
+
+          {selectedSpecies && (
+            <div className="mt-6 flex items-center gap-3">
+              <Badge className="bg-white/20 text-white border-white/30 px-4 py-2 hover:bg-white/30">
+                <Fish className="h-4 w-4 mr-2" />
+                Tracking: {selectedSpecies}
+              </Badge>
+            </div>
+          )}
+        </div>
       </div>
 
-      <div className="relative z-10 pt-24 pb-16 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Hero Section */}
-          <div className="text-center mb-16">
-            <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-full mb-6 backdrop-blur-md border border-emerald-400/30">
-              <TrendingUp className="h-10 w-10 text-emerald-400" />
-            </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 text-balance">Population Trends Analysis</h1>
-            <p className="text-xl text-emerald-100 max-w-3xl mx-auto text-balance">
-              Real-time monitoring and predictive modeling of marine biodiversity patterns using advanced statistical
-              analysis and machine learning forecasting.
-            </p>
-          </div>
+      <div className="flex">
+        <div className="w-80 bg-slate-800 shadow-xl border-r border-slate-700 min-h-screen relative z-10">
+          <div className="p-6">
+            <h2 className="text-xl font-bold text-slate-100 mb-6">Research Dashboard</h2>
 
-          {/* Key Metrics Dashboard */}
-          <div className="grid md:grid-cols-4 gap-6 mb-16">
-            {[
-              { icon: BarChart3, title: "Species Tracked", value: "2,847", change: "+12.3%", color: "emerald" },
-              { icon: Activity, title: "Population Health", value: "87.2%", change: "+2.1%", color: "teal" },
-              { icon: AlertTriangle, title: "At-Risk Species", value: "143", change: "-5.7%", color: "orange" },
-              { icon: Target, title: "Prediction Accuracy", value: "94.6%", change: "+1.8%", color: "cyan" },
-            ].map((metric, index) => (
-              <GlassmorphismCard key={index} className="p-6 text-center">
-                <div
-                  className={`w-12 h-12 bg-gradient-to-br from-${metric.color}-500/20 to-${metric.color}-600/20 rounded-lg flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-${metric.color}-400/30`}
+            {/* Real-time Stats */}
+            <div className="space-y-4 mb-8">
+              <Card className="p-4 border border-slate-700 bg-slate-700">
+                <div className="flex items-center gap-3 mb-2">
+                  <Activity className="h-5 w-5 text-blue-400" />
+                  <span className="font-semibold text-slate-100">Live Data Status</span>
+                </div>
+                <div className="text-2xl font-bold text-green-400">Active</div>
+                <div className="text-sm text-slate-300">Last updated: {currentTime || "Loading..."}</div>
+              </Card>
+
+              <Card className="p-4 border border-slate-700 bg-slate-700">
+                <div className="flex items-center gap-3 mb-2">
+                  <Fish className="h-5 w-5 text-blue-400" />
+                  <span className="font-semibold text-slate-100">Species Detected</span>
+                </div>
+                <div className="text-2xl font-bold text-blue-400">{totalSpeciesCount}</div>
+                <div className="text-sm text-slate-300">Unique species found</div>
+              </Card>
+
+              <Card className="p-4 border border-slate-700 bg-slate-700">
+                <div className="flex items-center gap-3 mb-2">
+                  <Gauge className="h-5 w-5 text-blue-400" />
+                  <span className="font-semibold text-slate-100">Avg Depth</span>
+                </div>
+                <div className="text-2xl font-bold text-indigo-400">{avgDepth}m</div>
+                <div className="text-sm text-slate-300">Deep sea focus</div>
+              </Card>
+
+              <Card className="p-4 border border-slate-700 bg-slate-700">
+                <div className="flex items-center gap-3 mb-2">
+                  <Thermometer className="h-5 w-5 text-blue-400" />
+                  <span className="font-semibold text-slate-100">Avg Temperature</span>
+                </div>
+                <div className="text-2xl font-bold text-cyan-400">{avgTemp}°C</div>
+                <div className="text-sm text-slate-300">Water temperature</div>
+              </Card>
+            </div>
+
+            {/* Data Sources */}
+            <div className="mb-8">
+              <h3 className="font-semibold text-slate-100 mb-4">Data Sources</h3>
+              <div className="space-y-3">
+                <div className="flex items-center gap-3 p-3 bg-blue-900/30 rounded-lg">
+                  <div className="w-3 h-3 bg-green-400 rounded-full"></div>
+                  <div>
+                    <div className="font-medium text-slate-100">OBIS Database</div>
+                    <div className="text-sm text-slate-300">Global species occurrences</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3 p-3 bg-slate-700 rounded-lg">
+                  <div className="w-3 h-3 bg-purple-400 rounded-full"></div>
+                  <div>
+                    <div className="font-medium text-slate-100">Groq AI API</div>
+                    <div className="text-sm text-slate-300">Intelligent species suggestions</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Research Tools */}
+            <div>
+              <h3 className="font-semibold text-slate-100 mb-4">Research Tools</h3>
+              <div className="space-y-2">
+                <Button
+                  variant="outline"
+                  className="w-full justify-start text-slate-200 border-slate-600 bg-slate-700 hover:bg-slate-600"
+                  onClick={handleExportData}
+                  disabled={!hasSearched || speciesData.length === 0}
                 >
-                  <metric.icon className={`h-6 w-6 text-${metric.color}-400`} />
-                </div>
-                <div className="text-2xl font-bold text-white mb-1">{metric.value}</div>
-                <div className="text-sm text-emerald-100 mb-2">{metric.title}</div>
-                <div className={`text-xs ${metric.change.startsWith("+") ? "text-emerald-400" : "text-orange-400"}`}>
-                  {metric.change} vs last month
-                </div>
-              </GlassmorphismCard>
-            ))}
-          </div>
-
-          {/* Analysis Features */}
-          <div className="grid lg:grid-cols-2 gap-12 mb-16">
-            <GlassmorphismCard className="p-8">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center">
-                <Waves className="h-8 w-8 text-teal-400 mr-3" />
-                Trend Analysis
-              </h2>
-              <div className="space-y-6">
-                {[
-                  {
-                    title: "Population Dynamics Modeling",
-                    description: "Advanced mathematical models tracking birth rates, mortality, and migration patterns",
-                    status: "Active",
-                  },
-                  {
-                    title: "Seasonal Pattern Recognition",
-                    description: "AI-powered detection of cyclical behaviors and environmental correlations",
-                    status: "Active",
-                  },
-                  {
-                    title: "Habitat Suitability Mapping",
-                    description: "Predictive modeling of optimal habitats based on environmental parameters",
-                    status: "Active",
-                  },
-                  {
-                    title: "Climate Impact Assessment",
-                    description: "Long-term analysis of climate change effects on species distribution",
-                    status: "Beta",
-                  },
-                ].map((feature, index) => (
-                  <div key={index} className="p-4 rounded-xl bg-white/5 border border-white/10">
-                    <div className="flex items-center justify-between mb-2">
-                      <h3 className="text-lg font-semibold text-white">{feature.title}</h3>
-                      <span
-                        className={`px-2 py-1 text-xs rounded-full ${
-                          feature.status === "Active"
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-400/30"
-                            : "bg-orange-500/20 text-orange-400 border border-orange-400/30"
-                        }`}
-                      >
-                        {feature.status}
-                      </span>
-                    </div>
-                    <p className="text-emerald-100 text-sm">{feature.description}</p>
-                  </div>
-                ))}
+                  <Globe className="h-4 w-4 mr-2" />
+                  Export Data
+                </Button>
               </div>
-            </GlassmorphismCard>
-
-            <GlassmorphismCard className="p-8">
-              <h2 className="text-3xl font-bold text-white mb-6">Predictive Capabilities</h2>
-              <div className="space-y-4">
-                <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-500/10 to-teal-500/10 border border-emerald-400/20">
-                  <h3 className="text-lg font-semibold text-white mb-2">Short-term Forecasting</h3>
-                  <p className="text-emerald-100 text-sm mb-3">1-6 month population predictions with 94.6% accuracy</p>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-full bg-white/10 rounded-full h-2">
-                      <div className="bg-emerald-400 h-2 rounded-full" style={{ width: "94.6%" }}></div>
-                    </div>
-                    <span className="text-emerald-400 text-sm font-semibold">94.6%</span>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-gradient-to-r from-teal-500/10 to-cyan-500/10 border border-teal-400/20">
-                  <h3 className="text-lg font-semibold text-white mb-2">Long-term Modeling</h3>
-                  <p className="text-teal-100 text-sm mb-3">5-20 year ecosystem projections and scenario analysis</p>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-full bg-white/10 rounded-full h-2">
-                      <div className="bg-teal-400 h-2 rounded-full" style={{ width: "87.3%" }}></div>
-                    </div>
-                    <span className="text-teal-400 text-sm font-semibold">87.3%</span>
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border border-cyan-400/20">
-                  <h3 className="text-lg font-semibold text-white mb-2">Risk Assessment</h3>
-                  <p className="text-cyan-100 text-sm mb-3">Early warning system for population decline risks</p>
-                  <div className="flex items-center space-x-2">
-                    <div className="w-full bg-white/10 rounded-full h-2">
-                      <div className="bg-cyan-400 h-2 rounded-full" style={{ width: "91.8%" }}></div>
-                    </div>
-                    <span className="text-cyan-400 text-sm font-semibold">91.8%</span>
-                  </div>
-                </div>
-              </div>
-            </GlassmorphismCard>
-          </div>
-
-          {/* Monitoring Timeline */}
-          <GlassmorphismCard className="p-8 mb-12">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center">Continuous Monitoring Process</h2>
-            <div className="grid md:grid-cols-6 gap-4">
-              {[
-                { phase: "Data Collection", duration: "24/7", icon: "📡" },
-                { phase: "Quality Control", duration: "Real-time", icon: "✅" },
-                { phase: "Trend Analysis", duration: "Hourly", icon: "📈" },
-                { phase: "Model Updates", duration: "Daily", icon: "🔄" },
-                { phase: "Predictions", duration: "Weekly", icon: "🔮" },
-                { phase: "Reporting", duration: "Monthly", icon: "📊" },
-              ].map((step, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-emerald-500/20 to-teal-600/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-emerald-400/30 text-2xl">
-                    {step.icon}
-                  </div>
-                  <h3 className="font-semibold text-white mb-1 text-sm">{step.phase}</h3>
-                  <p className="text-xs text-emerald-100">{step.duration}</p>
-                </div>
-              ))}
             </div>
-          </GlassmorphismCard>
-
-          {/* Gene Analysis Integration */}
-          <GlassmorphismCard className="p-8 mb-12">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center flex items-center justify-center">
-              <Dna className="h-8 w-8 text-emerald-400 mr-3" />
-              Population Analysis Through Gene Sequencing
-            </h2>
-            <p className="text-center text-emerald-100 mb-8 max-w-3xl mx-auto">
-              Our AI model analyzes gene sequences to identify species and predict population trends. Upload environmental DNA samples to get real-time population insights and biodiversity assessments.
-            </p>
-            <GeneSequenceAnalyzer />
-          </GlassmorphismCard>
-
-          {/* CTA */}
-          <div className="text-center">
-            <Link href="/solutions/conservation-insights">
-              <BubbleButton className="bg-gradient-to-r from-emerald-500/20 to-teal-500/20 border-emerald-400/30 hover:from-emerald-400/30 hover:to-teal-400/30 px-8 py-4 text-lg">
-                Explore Conservation Insights →
-              </BubbleButton>
-            </Link>
           </div>
+        </div>
+
+        {/* Main Map Area */}
+        <div className="flex-1 p-6 relative z-0">
+          <Card className="overflow-hidden border-0 shadow-xl relative z-0">
+            <div className="p-6 bg-gradient-to-r from-blue-600 to-blue-700 text-white">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-6 w-6" />
+                  <div>
+                    <h2 className="text-xl font-bold">
+                      {selectedSpecies ? `${selectedSpecies} Distribution Map` : "Global Deep Sea Species Distribution"}
+                    </h2>
+                    <p className="text-blue-100">
+                      {loading
+                        ? "Loading deep sea data..."
+                        : `${speciesData.length} real observation points • Focus: 200m+ depth • Max: 600 points`}
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-sm opacity-90">Research Institute</div>
+                  <div className="font-semibold">Deep Sea Monitoring</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="relative">
+              {!hasSearched ? (
+                <div className="w-full h-[600px] bg-slate-800 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <Search className="h-16 w-16 mx-auto mb-4 text-slate-400" />
+                    <h3 className="text-xl font-semibold text-slate-200 mb-2">Search for Deep Sea Species</h3>
+                    <p className="text-slate-400">Enter a scientific name or common name to explore deep sea species on the map</p>
+                  </div>
+                </div>
+              ) : speciesData.length === 0 && !loading ? (
+                <div className="w-full h-[600px] bg-slate-800 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <Fish className="h-16 w-16 mx-auto mb-4 text-slate-400" />
+                    <h3 className="text-xl font-semibold text-slate-200 mb-2">No Data Found</h3>
+                    <p className="text-slate-400 mb-4">No observations found for "{selectedSpecies}" in the OBIS database</p>
+                    <p className="text-sm text-slate-500">Try searching for a different species or check the spelling</p>
+                  </div>
+                </div>
+              ) : (
+              <MarineMap speciesData={speciesData} loading={loading} selectedSpecies={selectedSpecies} />
+              )}
+            </div>
+          </Card>
         </div>
       </div>
     </div>

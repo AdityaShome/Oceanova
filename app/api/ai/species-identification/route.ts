@@ -1,15 +1,12 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { GeminiAIService } from "@/lib/gemini-services"
+import { VISION_MODEL_ID } from "@/lib/gemini-client"
 import { getDatabase } from "@/lib/mongodb"
-import { getUserFromAuthHeader } from "@/lib/auth"
-import { TokenService } from "@/lib/token-service"
-import jwt from "jsonwebtoken"
-import { ObjectId } from "mongodb"
-import { getUserCollection } from "@/dbCollections"
+
 
 export async function POST(request: NextRequest) {
   try {
-    const { imageData, additionalContext, watchlist } = await request.json()
+    const { imageData, additionalContext } = await request.json()
 
     if (!imageData) {
       return NextResponse.json({ error: "Image data is required" }, { status: 400 })
@@ -67,61 +64,43 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Species identification completed:", result.species)
 
-    // Resolve user from auth header if present
-    const authUser = getUserFromAuthHeader(request.headers.get("authorization"))
-
-    // Store analysis result in database
-    const db = await getDatabase()
-    const analysisRecord = {
-      analysisType: "species_identification",
-      inputData: {
-        type: "image",
-        data: imageData.substring(0, 100) + "...", // Store truncated for privacy
-      },
-      results: {
-        primary: result.species,
-        confidence: result.confidence,
-        alternatives: [],
-        explanation: result.description,
-      },
-      modelUsed: "gemini-2.0-flash",
-      processingTime: Date.now(),
-      createdAt: new Date(),
-      userId: authUser?.id || null,
-    }
-
-    await db.collection("aiAnalyses").insertOne(analysisRecord)
-
-    // Optionally add to watchlist
-    if (watchlist === true) {
-      try {
-        await db.collection("watchlist").insertOne({
-          userId: authUser?.id || null,
-          itemType: "image_recognition",
-          referenceId: null,
-          title: result.species,
-          summary: result.description?.slice(0, 140) || null,
-          dataPreview: (imageData as string)?.slice(0, 60) + "...",
-          score: result.confidence,
-          createdAt: new Date(),
-        })
-      } catch (err) {
-        console.warn("Failed to add image recognition to watchlist", err)
+    // Try to store analysis result in database, but don't fail the request if DB write fails
+    let analysisId: unknown = undefined
+    try {
+      const db = await getDatabase()
+      const analysisRecord = {
+        analysisType: "species_identification",
+        inputData: {
+          type: "image",
+          data: imageData.substring(0, 100) + "...",
+        },
+        results: {
+          primary: result.species,
+          confidence: result.confidence,
+          alternatives: [],
+          explanation: result.description,
+        },
+        modelUsed: VISION_MODEL_ID,
+        processingTime: Date.now(),
+        createdAt: new Date(),
       }
+      const insert = await db.collection("aiAnalyses").insertOne(analysisRecord)
+      analysisId = insert.insertedId
+    } catch (dbError) {
+      console.warn("[v0] Skipping DB save for species identification:", dbError)
     }
 
     return NextResponse.json({
       success: true,
       result,
-      analysisId: analysisRecord._id,
+      analysisId,
     })
   } catch (error) {
     console.error("[v0] Species identification API error:", error)
-    return NextResponse.json(
-      {
-        error: error instanceof Error ? error.message : "Species identification failed",
-      },
-      { status: 500 },
-    )
+    const message = error instanceof Error ? error.message : "Species identification failed"
+    const isOverloaded = /503|overloaded|temporarily unavailable/i.test(message)
+    const isRateLimited = /429|rate limit/i.test(message)
+    const status = isOverloaded ? 503 : isRateLimited ? 429 : 500
+    return NextResponse.json({ error: message }, { status })
   }
 }

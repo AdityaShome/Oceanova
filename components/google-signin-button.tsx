@@ -21,7 +21,7 @@ export function GoogleSignInButton({ label = "Continue with Google" }: { label?:
       disabled={loading}
       className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-md border bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow hover:bg-gray-50 disabled:opacity-60"
     >
-      <Image src="/google.svg" alt="Google" width={16} height={16} />
+      <Image src="/google.png" alt="Google" width={16} height={16} />
       {loading ? "Redirecting..." : label}
     </button>
   );
