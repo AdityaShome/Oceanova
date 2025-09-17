@@ -1,4 +1,3 @@
-import { Navigation } from "@/components/navigation"
 import { HeroSection } from "@/components/hero-section"
 import { SolutionSection } from "@/components/solution-section"
 import { InteractivePredictionSection } from "@/components/interactive-prediction-section"
@@ -18,7 +17,6 @@ export default function HomePage() {
   return (
     <div className="min-h-screen bg-background">
       <BubbleCursor />
-      <Navigation />
       <main>
         <HeroSection />
         <SolutionSection />

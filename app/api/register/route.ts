@@ -11,7 +11,8 @@ export async function POST(req: NextRequest) {
     }
 
     const users = await getUserCollection()
-    const existingUser = await users.findOne({ email })
+    const normalizedEmail = String(email).trim().toLowerCase()
+    const existingUser = await users.findOne({ email: normalizedEmail })
 
     if (existingUser) {
       return NextResponse.json({ message: "User already exists" }, { status: 400 })
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
 
     await users.insertOne({
       username,
-      email,
+      email: normalizedEmail,
       password: hashedPassword,
       firstName: firstName || "",
       lastName: lastName || "",

@@ -5,6 +5,7 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { BubbleCursor } from "@/components/bubble-cursor"
+import { NavigationWrapper } from "@/components/navigation-wrapper"
 import { FloatingUpgradeButton } from "@/components/floating-upgrade-button"
 import "./globals.css"
 
@@ -32,7 +33,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <BubbleCursor />
-        <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
+        <Suspense fallback={<div>Loading...</div>}>
+          <NavigationWrapper>{children}</NavigationWrapper>
+        </Suspense>
         <FloatingUpgradeButton />
         <Analytics />
       </body>
