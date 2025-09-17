@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     const result = await db.collection("waterQualityData").insertOne(record)
 
-    console.log("[v0] Water quality record added:")
+    console.log("[v0] Water quality record added:", result.insertedId)
 
     return NextResponse.json({
       success: true,

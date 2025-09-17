@@ -44,6 +44,7 @@
     "@sveltejs/kit": "latest",
     "@types/leaflet": "^1.9.20",
     "@types/leaflet.heat": "^0.2.5",
+
     "@types/nodemailer": "^7.0.1",
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
@@ -69,7 +70,6 @@
     "next": "14.2.16",
     "next-themes": "latest",
     "nodemailer": "^7.0.6",
-    "razorpay": "^2.9.6",
     "react": "^18.3.1",
     "react-day-picker": "latest",
     "react-dom": "^18.3.1",
@@ -91,6 +91,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
+
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.18.1",
     "@types/react": "^18.3.24",

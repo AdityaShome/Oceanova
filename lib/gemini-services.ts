@@ -268,32 +268,32 @@ export class GeminiAIService {
 
   // Helper methods to parse AI responses into structured data
   private static parseSpeciesIdentification(text: string): SpeciesIdentificationResult {
-    console.log("[DEBUG] Raw AI response:")
+    console.log("[DEBUG] Raw AI response:", text)
     
     // Try to extract species name from various patterns
     const species = this.extractValue(text, "species") || 
-                   this.extractValue(text, "Species") || 
-                   this.extractValue(text, "species name") ||
-                   this.extractValue(text, "Species Name") ||
-                   this.extractValue(text, "identified") ||
-                   this.extractValue(text, "identification") ||
-                   this.extractValue(text, "organism") ||
-                   this.extractValue(text, "marine") ||
-                   "Unknown Species"
+                      this.extractValue(text, "Species") || 
+                      this.extractValue(text, "species name") ||
+                      this.extractValue(text, "Species Name") ||
+                      this.extractValue(text, "identified") ||
+                      this.extractValue(text, "identification") ||
+                      this.extractValue(text, "organism") ||
+                      this.extractValue(text, "marine") ||
+                      "Unknown Species"
     
     const confidence = Number.parseFloat(this.extractValue(text, "confidence") || 
-                                        this.extractValue(text, "Confidence") || 
-                                        this.extractValue(text, "probability") ||
-                                        this.extractValue(text, "certainty") ||
-                                        "75")
+                                           this.extractValue(text, "Confidence") || 
+                                           this.extractValue(text, "probability") ||
+                                           this.extractValue(text, "certainty") ||
+                                           "75")
     
     const scientificName = this.extractValue(text, "scientific") || 
-                          this.extractValue(text, "Scientific") || 
-                          this.extractValue(text, "scientific name") ||
-                          this.extractValue(text, "Scientific Name") ||
-                          this.extractValue(text, "binomial") ||
-                          this.extractValue(text, "taxonomic") ||
-                          species
+                           this.extractValue(text, "Scientific") || 
+                           this.extractValue(text, "scientific name") ||
+                           this.extractValue(text, "Scientific Name") ||
+                           this.extractValue(text, "binomial") ||
+                           this.extractValue(text, "taxonomic") ||
+                           species
 
     // If we still don't have a species, try to extract from the first line
     const finalSpecies = species === "Unknown Species" ? 
@@ -331,10 +331,10 @@ export class GeminiAIService {
                this.extractValue(text, "depth") ||
                "Marine environment",
       conservationStatus: this.extractValue(text, "conservation") || 
-                         this.extractValue(text, "Conservation") || 
-                         this.extractValue(text, "status") ||
-                         this.extractValue(text, "threatened") ||
-                         "Unknown",
+                          this.extractValue(text, "Conservation") || 
+                          this.extractValue(text, "status") ||
+                          this.extractValue(text, "threatened") ||
+                          "Unknown",
       threats: this.extractList(text, "threats") || 
                this.extractList(text, "Threats") || 
                this.extractList(text, "risks") ||
