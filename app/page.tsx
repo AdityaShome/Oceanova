@@ -3,7 +3,6 @@ import { HeroSection } from "@/components/hero-section"
 import { SolutionSection } from "@/components/solution-section"
 import { InteractivePredictionSection } from "@/components/interactive-prediction-section"
 import { DataResultsSection } from "@/components/data-results-section"
-import { ContactSection } from "@/components/contact-section"
 import { ContaminationMap } from "@/components/contamination-map"
 import { BubbleCursor } from "@/components/bubble-cursor"
 import { cookies } from "next/headers"
@@ -35,7 +34,6 @@ export default function HomePage() {
             <ContaminationMap />
           </div>
         </section>
-        <ContactSection />
       </main>
     </div>
   )

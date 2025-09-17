@@ -8,6 +8,7 @@ import { Mail, Shield, ArrowLeft, CheckCircle, User, Upload } from "lucide-react
 export default function RegisterPage() {
 	const router = useRouter();
 	const [avatarPreview, setAvatarPreview] = useState<string>("");
+	const [selectedFileName, setSelectedFileName] = useState<string>("");
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 	const [success, setSuccess] = useState<string | null>(null);
@@ -222,8 +223,26 @@ export default function RegisterPage() {
 		if (!file) {
 			return;
 		}
+
+		// Validate file type
+		if (!file.type.startsWith('image/')) {
+			setError('Please select a valid image file (JPG, PNG, etc.)');
+			return;
+		}
+
+		// Validate file size (2MB limit)
+		if (file.size > 2 * 1024 * 1024) {
+			setError('File size must be less than 2MB');
+			return;
+		}
+
+		// Clear any previous errors
+		setError(null);
+
+		// Create preview URL and set filename
 		const url = URL.createObjectURL(file);
 		setAvatarPreview(url);
+		setSelectedFileName(file.name);
 	}
 
 	return (
@@ -265,11 +284,23 @@ export default function RegisterPage() {
 											<Upload className="w-6 h-6 text-white/70" />
 										)}
 									</div>
-									<div>
-										<label htmlFor="avatar" className="text-sm font-medium">
+									<div className="flex-1">
+										<label htmlFor="avatar" className="text-sm font-medium block mb-2">
 											Upload avatar
 										</label>
-										<input id="avatar" name="avatar" type="file" accept="image/*" onChange={onAvatarChange} className="mt-1 block text-sm" />
+										<div className="relative">
+											<input 
+												id="avatar" 
+												name="avatar" 
+												type="file" 
+												accept="image/*" 
+												onChange={onAvatarChange} 
+												className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+											/>
+											<div className="w-full px-3 py-2 border border-white/20 rounded-md bg-white/10 text-sm text-white/80 hover:bg-white/20 transition-colors cursor-pointer">
+												{selectedFileName || "Choose File"}
+											</div>
+										</div>
 										<p className="text-xs text-white/60 mt-1">JPG/PNG, up to ~2MB recommended.</p>
 									</div>
 								</div>

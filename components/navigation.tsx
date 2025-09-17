@@ -35,14 +35,9 @@ export function Navigation() {
     { href: "/species-recognition", label: "Species Recognition", icon: "🔍" },
     { href: "/water-quality", label: "Water Quality", icon: "💧" },
     { href: "/dashboard", label: "Dashboard", icon: "📋" },
+    { href: "/contact", label: "Contact", icon: "📞" },
   ]
 
-  const scrollToContact = () => {
-    const contactSection = document.getElementById("contact")
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: "smooth" })
-    }
-  }
 
   const handleLogout = async () => {
     try {
@@ -172,13 +167,6 @@ export function Navigation() {
                   )}
                 </div>
 
-                {/* Contact Button */}
-                <BubbleButton
-                  onClick={scrollToContact}
-                  className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400/30 hover:from-emerald-400/30 hover:to-cyan-400/30 hover:shadow-lg hover:shadow-emerald-400/25 transition-all duration-300 px-2 py-1.5 text-[10px]"
-                >
-                  Contact Us
-                </BubbleButton>
               </div>
             </div>
 
@@ -259,17 +247,6 @@ export function Navigation() {
                   </div>
                 )}
                 
-                <div className="pt-4">
-                  <BubbleButton
-                    onClick={() => {
-                      scrollToContact()
-                      setIsMenuOpen(false)
-                    }}
-                    className="w-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400/30 hover:from-emerald-400/30 hover:to-cyan-400/30"
-                  >
-                    Contact Us
-                  </BubbleButton>
-                </div>
               </div>
             </div>
           )}

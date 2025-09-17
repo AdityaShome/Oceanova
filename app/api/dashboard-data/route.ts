@@ -9,6 +9,10 @@ export async function GET(request: NextRequest) {
 
     const { db } = await connectToDatabase()
 
+    if (!db) {
+      return NextResponse.json({ error: "Database connection failed" }, { status: 500 })
+    }
+
     // Calculate date range based on timeframe
     const now = new Date()
     const timeframeMap = {

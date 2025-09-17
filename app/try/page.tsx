@@ -145,8 +145,8 @@ export default function TryPage() {
 				))}
 			</div>
 
-			{/* System status indicators */}
-			<div className="absolute top-20 left-4 z-20">
+			{/* System status indicators - moved down */}
+			<div className="absolute top-32 left-4 z-20">
 				<div className="space-y-2">
 					{[
 						{ name: "AI Processing", status: "Active", color: "green" },
@@ -165,8 +165,8 @@ export default function TryPage() {
 				</div>
 			</div>
 
-			{/* Environmental readings */}
-			<div className="absolute top-20 right-4 z-20">
+			{/* Environmental readings - moved below ocean depth */}
+			<div className="absolute top-48 right-4 z-20">
 				<div className="bg-slate-900/30 backdrop-blur-sm border border-teal-400/20 rounded-lg p-3">
 					<div className="text-xs text-teal-300 font-medium mb-2">Environmental Data</div>
 					<div className="space-y-1 text-xs">
@@ -282,7 +282,7 @@ export default function TryPage() {
 			{/* Main content */}
 			<div className="relative z-30 flex min-h-screen items-center justify-center px-6">
 				<div className="text-center max-w-5xl mx-auto">
-					<div className="mb-12 flex items-center justify-center">
+					<div className="mb-20 mt-8 flex items-center justify-center">
 						<div className="relative flex items-center space-x-4">
 							<div className="relative">
 								<div className="absolute inset-0 w-16 h-16 rounded-full bg-gradient-to-r from-cyan-400 to-blue-500 blur-lg opacity-60 animate-pulse"></div>

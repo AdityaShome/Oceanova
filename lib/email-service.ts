@@ -154,3 +154,74 @@ export async function sendWelcomeEmail(email: string, name: string) {
     return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
   }
 }
+
+export async function sendContactEmail(contactData: {
+  firstName: string;
+  lastName: string;
+  email: string;
+  institution: string;
+  message: string;
+}) {
+  if (EMAIL_DISABLED) {
+    console.log(`✉️ [DEV] EMAIL_DISABLE=true. Pretending to send contact message from ${contactData.email}`);
+    return { success: true };
+  }
+
+  const mailOptions = {
+    from: process.env.HOST_EMAIL,
+    to: 'aochuba52@gmail.com', // Your email address
+    subject: `🌊 New Contact Message from ${contactData.firstName} ${contactData.lastName} - AI Biodiversity Platform`,
+    html: `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0891b2 100%); padding: 40px; border-radius: 20px; color: white;">
+        <div style="text-align: center; margin-bottom: 30px;">
+          <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #06b6d4, #3b82f6); border-radius: 50%; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center; font-size: 32px;">
+            🌊
+          </div>
+          <h1 style="color: #06b6d4; margin: 0; font-size: 28px;">New Contact Message</h1>
+          <p style="color: #94a3b8; margin: 10px 0 0; font-size: 16px;">AI Biodiversity Platform</p>
+        </div>
+        
+        <div style="background: rgba(255, 255, 255, 0.1); padding: 30px; border-radius: 15px; margin-bottom: 30px; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2);">
+          <h2 style="color: white; margin: 0 0 20px; font-size: 24px;">Contact Details</h2>
+          
+          <div style="margin-bottom: 20px;">
+            <h3 style="color: #06b6d4; margin: 0 0 10px; font-size: 18px;">Name</h3>
+            <p style="color: #cbd5e1; margin: 0; font-size: 16px;">${contactData.firstName} ${contactData.lastName}</p>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <h3 style="color: #06b6d4; margin: 0 0 10px; font-size: 18px;">Email</h3>
+            <p style="color: #cbd5e1; margin: 0; font-size: 16px;">${contactData.email}</p>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <h3 style="color: #06b6d4; margin: 0 0 10px; font-size: 18px;">Institution/Organization</h3>
+            <p style="color: #cbd5e1; margin: 0; font-size: 16px;">${contactData.institution}</p>
+          </div>
+          
+          <div style="margin-bottom: 20px;">
+            <h3 style="color: #06b6d4; margin: 0 0 10px; font-size: 18px;">Message</h3>
+            <div style="background: rgba(6, 182, 212, 0.1); padding: 15px; border-radius: 10px; border-left: 4px solid #06b6d4;">
+              <p style="color: #cbd5e1; margin: 0; font-size: 16px; line-height: 1.6; white-space: pre-wrap;">${contactData.message}</p>
+            </div>
+          </div>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px;">
+          <p style="color: #94a3b8; margin: 0; font-size: 14px;">This message was sent from the AI Biodiversity Platform contact form.</p>
+          <p style="color: #94a3b8; margin: 10px 0 0; font-size: 14px;">Reply directly to this email to respond to ${contactData.firstName}.</p>
+        </div>
+      </div>
+    `,
+  };
+
+  try {
+    if (!transporter) throw new Error('SMTP transporter not configured');
+    await transporter.sendMail(mailOptions);
+    console.log(`✅ Contact email sent successfully from ${contactData.email}`);
+    return { success: true };
+  } catch (error) {
+    console.error('❌ Error sending contact email:', error);
+    return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+  }
+}
