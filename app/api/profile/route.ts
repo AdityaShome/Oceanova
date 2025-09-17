@@ -9,7 +9,7 @@ export async function GET(req: Request) {
 
     // Extract token from cookies
     const cookieHeader = req.headers.get("cookie");
-    console.log("Cookie header:", cookieHeader);
+    console.log("Cookie header:");
     
     if (!cookieHeader) {
       return NextResponse.json({ 
@@ -46,7 +46,7 @@ export async function GET(req: Request) {
     let decoded: any;
     try {
       decoded = jwt.verify(token, jwtSecret);
-      console.log("JWT decoded successfully, user ID:", decoded.id);
+      // console.log("JWT decoded successfully, user ID:", decoded.id);
     } catch (jwtError: any) {
       console.error("JWT verification failed:", jwtError.message);
       
@@ -73,7 +73,7 @@ export async function GET(req: Request) {
     console.log("User found:", user ? "Yes" : "No");
     
     if (!user) {
-      return NextResponse.json({ 
+      return NextResponse.json({
         success: false, 
         error: "User not found",
         debug: `User ID ${decoded.id} not found in database`
@@ -88,7 +88,17 @@ export async function GET(req: Request) {
         lastName: user.lastName || "",
         email: user.email,
         dob: user.dob,
-        avatar: user.avatar
+        avatar: user.avatar,
+        subscription: user.subscription || {
+          plan: 'basic',
+          status: 'active'
+        },
+        tokens: user.tokens || {
+          dailyLimit: 10,
+          usedToday: 0,
+          lastResetDate: new Date(),
+          totalUsed: 0
+        }
       }
     });
     

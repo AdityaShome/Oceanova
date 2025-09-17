@@ -1,6 +1,7 @@
 import { DataVisualizationDashboard } from "@/components/data-visualization-dashboard"
 import { HomeButton } from "@/components/home-button"
 import { BubbleCursor } from "@/components/bubble-cursor"
+import { UpgradeBanner } from "@/components/upgrade-banner"
 
 export default function DashboardPage() {
   return (
@@ -35,6 +36,11 @@ export default function DashboardPage() {
         <div className="relative z-10">
           <HomeButton />
           <div className="container mx-auto px-4 py-8">
+            {/* Upgrade Banner */}
+            <div className="mb-6">
+              <UpgradeBanner variant="card" />
+            </div>
+            
             <div className="backdrop-blur-md bg-white/5 border border-white/10 rounded-3xl p-8 shadow-2xl">
               <DataVisualizationDashboard />
             </div>

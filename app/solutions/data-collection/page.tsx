@@ -1,12 +1,16 @@
+"use client"
+
 import { HomeButton } from "@/components/home-button"
 import { BubbleCursor } from "@/components/bubble-cursor"
 import { GlassmorphismCard } from "@/components/glassmorphism-card"
 import { BubbleButton } from "@/components/bubble-button"
-import { Database, Waves, Microscope, Sofa as Sonar, Dna, Camera, Bookmark } from "lucide-react"
-import { cookies } from "next/headers"
-import jwt from "jsonwebtoken"
-import { getDatabase } from "@/lib/mongodb"
-
+import { Bookmark, Upload, FileText, Mail, Shield, Send, User, MessageSquare, Phone, MapPin } from "lucide-react"
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { useToast } from "@/hooks/use-toast"
 
 type WatchItem = {
   _id: string
@@ -17,28 +21,134 @@ type WatchItem = {
   createdAt?: string
 }
 
-export default async function DataCollectionPage() {
-  const cookieStore = cookies()
-  const token = cookieStore.get("auth_token")?.value
-  let watchlist: WatchItem[] = []
+export default function WatchlistPage() {
+  const [watchlist, setWatchlist] = useState<WatchItem[]>([])
+  const [loading, setLoading] = useState(true)
+  const [submitting, setSubmitting] = useState(false)
+  const [contactSubmitting, setContactSubmitting] = useState(false)
+  const { toast } = useToast()
 
-  try {
-    if (token) {
-      const decoded = jwt.decode(token) as { id?: string } | null
-      if (decoded?.id) {
-        const db = await getDatabase()
-        const items = await db
-          .collection("watchlist")
-          .find({ userId: decoded.id })
-          .project({ itemType: 1, title: 1, summary: 1, score: 1, createdAt: 1 })
-          .sort({ createdAt: -1 })
-          .limit(10)
-          .toArray()
-        watchlist = items.map((d: any) => ({ _id: d._id?.toString?.() ?? "", itemType: d.itemType, title: d.title, summary: d.summary, score: d.score, createdAt: d.createdAt?.toISOString?.() }))
+  // Data submission form state
+  const [credentials, setCredentials] = useState({
+    name: "",
+    email: "",
+    institution: "",
+    verificationCode: ""
+  })
+  const [description, setDescription] = useState("")
+  const [selectedFile, setSelectedFile] = useState<File | null>(null)
+
+  // Contact form state
+  const [contactForm, setContactForm] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    institution: "",
+    message: ""
+  })
+
+  useEffect(() => {
+    fetchWatchlist()
+  }, [])
+
+  const fetchWatchlist = async () => {
+    try {
+      const response = await fetch('/api/watchlist')
+      if (response.ok) {
+        const data = await response.json()
+        setWatchlist(data.watchlist || [])
       }
+    } catch (error) {
+      console.error('Error fetching watchlist:', error)
+    } finally {
+      setLoading(false)
     }
-  } catch (e) {
-    // Non-blocking
+  }
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (file) {
+      setSelectedFile(file)
+    }
+  }
+
+  const handleDataSubmission = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setSubmitting(true)
+
+    try {
+      const formData = new FormData()
+      formData.append('name', credentials.name)
+      formData.append('email', credentials.email)
+      formData.append('institution', credentials.institution)
+      formData.append('verificationCode', credentials.verificationCode)
+      formData.append('description', description)
+      if (selectedFile) {
+        formData.append('file', selectedFile)
+      }
+
+      const response = await fetch('/api/admin-message', {
+        method: 'POST',
+        body: formData
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Your data submission has been sent to the admin team for review.",
+        })
+        // Reset form
+        setCredentials({ name: "", email: "", institution: "", verificationCode: "" })
+        setDescription("")
+        setSelectedFile(null)
+      } else {
+        throw new Error('Failed to submit')
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to submit your data. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const handleContactSubmission = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setContactSubmitting(true)
+
+    try {
+      const response = await fetch('/api/admin-message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          type: 'contact',
+          ...contactForm
+        })
+      })
+
+      if (response.ok) {
+        toast({
+          title: "Success",
+          description: "Your message has been sent to the admin team.",
+        })
+        setContactForm({ firstName: "", lastName: "", email: "", institution: "", message: "" })
+      } else {
+        throw new Error('Failed to send message')
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to send your message. Please try again.",
+        variant: "destructive"
+      })
+    } finally {
+      setContactSubmitting(false)
+    }
   }
 
   return (
@@ -58,144 +168,291 @@ export default async function DataCollectionPage() {
           {/* Hero Section */}
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full mb-6 backdrop-blur-md border border-cyan-400/30">
-              <Database className="h-10 w-10 text-cyan-400" />
+              <Bookmark className="h-10 w-10 text-cyan-400" />
             </div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 text-balance">Deep Sea Data Collection</h1>
+            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6 text-balance">Research Watchlist</h1>
             <p className="text-xl text-cyan-100 max-w-3xl mx-auto text-balance">
-              Advanced underwater data acquisition systems for comprehensive marine biodiversity research using
-              cutting-edge ROV technology and environmental DNA sampling.
+              Track your research interests, submit new data for review, and collaborate with our marine biodiversity research team.
             </p>
           </div>
 
-          {/* Main Content Grid */}
-          <div className="grid lg:grid-cols-2 gap-12 mb-16">
-            {/* Technologies */}
-            <GlassmorphismCard className="p-8">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center">
-                <Waves className="h-8 w-8 text-cyan-400 mr-3" />
-                Collection Technologies
-              </h2>
-              <div className="space-y-6">
-                {[
-                  {
-                    icon: Sonar,
-                    title: "Advanced Sonar Systems",
-                    description:
-                      "Multi-beam sonar mapping for habitat characterization and species detection at depths up to 6000m.",
-                  },
-                  {
-                    icon: Camera,
-                    title: "4K Underwater Imaging",
-                    description:
-                      "High-resolution cameras with specialized lighting for species identification and behavioral analysis.",
-                  },
-                  {
-                    icon: Dna,
-                    title: "Environmental DNA Sampling",
-                    description:
-                      "Water sample collection and filtration systems for genetic material analysis and species detection.",
-                  },
-                ].map((tech, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-4 p-4 rounded-xl bg-white/5 border border-white/10"
-                  >
-                    <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-lg flex items-center justify-center backdrop-blur-md border border-cyan-400/30">
-                      <tech.icon className="h-6 w-6 text-cyan-400" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-white mb-2">{tech.title}</h3>
-                      <p className="text-cyan-100 text-sm">{tech.description}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </GlassmorphismCard>
-
-            {/* Capabilities */}
-            <GlassmorphismCard className="p-8">
-              <h2 className="text-3xl font-bold text-white mb-6 flex items-center">
-                <Microscope className="h-8 w-8 text-emerald-400 mr-3" />
-                Research Capabilities
-              </h2>
-              <div className="space-y-4">
-                {[
-                  "Multi-depth water column sampling (0-6000m)",
-                  "Real-time species identification and counting",
-                  "Habitat mapping and 3D reconstruction",
-                  "Environmental parameter monitoring",
-                  "Genetic material collection and preservation",
-                  "Behavioral observation and documentation",
-                  "Pollution and microplastic detection",
-                  "Ecosystem health assessment",
-                ].map((capability, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center space-x-3 p-3 rounded-lg bg-white/5 border border-white/10"
-                  >
-                    <div className="w-2 h-2 bg-emerald-400 rounded-full"></div>
-                    <span className="text-cyan-100">{capability}</span>
-                  </div>
-                ))}
-              </div>
-            </GlassmorphismCard>
-          </div>
-
-          {/* Watchlist */}
+          {/* Watchlist Section */}
           <GlassmorphismCard className="p-8 mb-12">
             <h2 className="text-3xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3">
               <Bookmark className="h-8 w-8 text-cyan-400" />
-              Your Watchlist
+              Your Research Watchlist
             </h2>
             <div className="grid md:grid-cols-2 gap-6">
               <div className="space-y-3">
-                {watchlist.length === 0 && (
-                  <div className="text-cyan-100/80 text-sm">No items watchlisted yet.</div>
-                )}
-                {watchlist.map((item) => (
-                  <div key={item._id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
-                    <div>
-                      <div className="text-white text-sm font-medium">
-                        {item.title || (item.itemType === "gene_sequence" ? "eDNA analysis" : "Image recognition")}
+                {loading ? (
+                  <div className="text-cyan-100/80 text-sm">Loading your watchlist...</div>
+                ) : watchlist.length === 0 ? (
+                  <div className="text-cyan-100/80 text-sm">No items in your watchlist yet. Start by exploring our AI tools!</div>
+                ) : (
+                  watchlist.map((item) => (
+                    <div key={item._id} className="flex items-center justify-between p-3 rounded-lg bg-white/5 border border-white/10">
+                      <div>
+                        <div className="text-white text-sm font-medium">
+                          {item.title || (item.itemType === "gene_sequence" ? "eDNA Analysis" : "Image Recognition")}
+                        </div>
+                        {item.summary && <div className="text-cyan-200 text-xs">{item.summary}</div>}
                       </div>
-                      {item.summary && <div className="text-cyan-200 text-xs">{item.summary}</div>}
+                      <div className="text-cyan-200 text-xs">
+                        {typeof item.score === "number" ? `${Math.round(item.score * 100) / 100}%` : ""}
+                      </div>
                     </div>
-                    <div className="text-cyan-200 text-xs">
-                      {typeof item.score === "number" ? `${Math.round(item.score * 100) / 100}%` : ""}
-                    </div>
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </GlassmorphismCard>
 
-          {/* Process Flow */}
+          {/* Data Submission Section */}
           <GlassmorphismCard className="p-8 mb-12">
-            <h2 className="text-3xl font-bold text-white mb-8 text-center">Data Collection Workflow</h2>
-            <div className="grid md:grid-cols-4 gap-6">
-              {[
-                { step: "1", title: "Mission Planning", desc: "Route optimization and target identification" },
-                { step: "2", title: "ROV Deployment", desc: "Underwater vehicle launch and navigation" },
-                { step: "3", title: "Data Acquisition", desc: "Multi-sensor data collection and sampling" },
-                { step: "4", title: "Quality Control", desc: "Real-time validation and storage" },
-              ].map((phase, index) => (
-                <div key={index} className="text-center">
-                  <div className="w-16 h-16 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-md border border-cyan-400/30">
-                    <span className="text-2xl font-bold text-cyan-400">{phase.step}</span>
+            <h2 className="text-3xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3">
+              <Upload className="h-8 w-8 text-emerald-400" />
+              Submit New Data
+            </h2>
+            <p className="text-cyan-100 text-center mb-8 max-w-2xl mx-auto">
+              Contribute to our marine biodiversity database by submitting your research data, images, or documents for review by our expert team.
+            </p>
+
+            <form onSubmit={handleDataSubmission} className="max-w-4xl mx-auto space-y-6">
+              {/* Credentials Verification */}
+              <div className="bg-white/5 rounded-xl p-6 border border-white/10">
+                <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-2">
+                  <Shield className="h-5 w-5 text-cyan-400" />
+                  Verify Your Credentials
+                </h3>
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-cyan-100 mb-2 block">Full Name *</label>
+                    <Input
+                      value={credentials.name}
+                      onChange={(e) => setCredentials({...credentials, name: e.target.value})}
+                      placeholder="Dr. Jane Smith"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                      required
+                    />
                   </div>
-                  <h3 className="font-semibold text-white mb-2">{phase.title}</h3>
-                  <p className="text-sm text-cyan-100">{phase.desc}</p>
+                  <div>
+                    <label className="text-sm font-medium text-cyan-100 mb-2 block">Email Address *</label>
+                    <Input
+                      type="email"
+                      value={credentials.email}
+                      onChange={(e) => setCredentials({...credentials, email: e.target.value})}
+                      placeholder="jane.smith@university.edu"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-cyan-100 mb-2 block">Institution/Organization *</label>
+                    <Input
+                      value={credentials.institution}
+                      onChange={(e) => setCredentials({...credentials, institution: e.target.value})}
+                      placeholder="Marine Research Institute"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-cyan-100 mb-2 block">Verification Code *</label>
+                    <Input
+                      value={credentials.verificationCode}
+                      onChange={(e) => setCredentials({...credentials, verificationCode: e.target.value})}
+                      placeholder="Enter verification code"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                      required
+                    />
+                    <p className="text-xs text-cyan-200 mt-1">Contact admin for verification code</p>
+                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+
+              {/* Description */}
+              <div>
+                <label className="text-sm font-medium text-cyan-100 mb-2 block">Data Description *</label>
+                <Textarea
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Please provide a detailed explanation of the data you want to add, including its source, collection method, and relevance to marine biodiversity research..."
+                  className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200 min-h-[120px]"
+                  required
+                />
+              </div>
+
+              {/* File Upload */}
+              <div>
+                <label className="text-sm font-medium text-cyan-100 mb-2 block">Attach Supporting Files (Optional)</label>
+                <div className="border-2 border-dashed border-white/20 rounded-lg p-6 text-center hover:border-cyan-400/50 transition-colors">
+                  <Upload className="h-8 w-8 text-cyan-400 mx-auto mb-2" />
+                  <input
+                    type="file"
+                    onChange={handleFileChange}
+                    accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.csv,.xlsx"
+                    className="hidden"
+                    id="file-upload"
+                  />
+                  <label htmlFor="file-upload" className="cursor-pointer">
+                    <span className="text-cyan-100 hover:text-cyan-300">Click to upload files</span>
+                  </label>
+                  {selectedFile && (
+                    <p className="text-cyan-200 text-sm mt-2">Selected: {selectedFile.name}</p>
+                  )}
+                  <p className="text-cyan-200/70 text-xs mt-1">PDF, DOC, images, or data files (max 10MB)</p>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400/30 hover:from-emerald-400/30 hover:to-cyan-400/30 text-white"
+              >
+                {submitting ? "Submitting..." : "Send Message to Admin"}
+              </Button>
+            </form>
           </GlassmorphismCard>
 
-          {/* CTA */}
-          <div className="text-center">
-            <BubbleButton className="bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border-emerald-400/30 hover:from-emerald-400/30 hover:to-cyan-400/30 px-8 py-4 text-lg">
-              Explore Data Processing →
-            </BubbleButton>
-          </div>
+          {/* Contact Admin Section */}
+          <GlassmorphismCard className="p-8">
+            <h2 className="text-3xl font-bold text-white mb-8 text-center flex items-center justify-center gap-3">
+              <MessageSquare className="h-8 w-8 text-blue-400" />
+              Contact Admin Team
+            </h2>
+            <p className="text-cyan-100 text-center mb-8 max-w-2xl mx-auto">
+              Have questions or need assistance? Get in touch with our research team for support and collaboration opportunities.
+            </p>
+
+            <div className="grid lg:grid-cols-2 gap-12">
+              {/* Contact Form */}
+              <Card className="bg-white/5 border-white/10">
+                <CardHeader>
+                  <CardTitle className="text-white">Send a Message</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleContactSubmission} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-sm font-medium text-cyan-100 mb-2 block">First Name</label>
+                        <Input
+                          value={contactForm.firstName}
+                          onChange={(e) => setContactForm({...contactForm, firstName: e.target.value})}
+                          placeholder="John"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-cyan-100 mb-2 block">Last Name</label>
+                        <Input
+                          value={contactForm.lastName}
+                          onChange={(e) => setContactForm({...contactForm, lastName: e.target.value})}
+                          placeholder="Doe"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-cyan-100 mb-2 block">Email</label>
+                      <Input
+                        type="email"
+                        value={contactForm.email}
+                        onChange={(e) => setContactForm({...contactForm, email: e.target.value})}
+                        placeholder="john.doe@university.edu"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-cyan-100 mb-2 block">Institution/Organization</label>
+                      <Input
+                        value={contactForm.institution}
+                        onChange={(e) => setContactForm({...contactForm, institution: e.target.value})}
+                        placeholder="Marine Research Institute"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-cyan-100 mb-2 block">Message</label>
+                      <Textarea
+                        value={contactForm.message}
+                        onChange={(e) => setContactForm({...contactForm, message: e.target.value})}
+                        placeholder="Tell us about your research interests or collaboration ideas..."
+                        className="bg-white/10 border-white/20 text-white placeholder:text-cyan-200 min-h-[120px]"
+                        required
+                      />
+                    </div>
+
+                    <Button
+                      type="submit"
+                      disabled={contactSubmitting}
+                      className="w-full bg-gradient-to-r from-blue-500/20 to-cyan-500/20 border-blue-400/30 hover:from-blue-400/30 hover:to-cyan-400/30 text-white"
+                    >
+                      {contactSubmitting ? "Sending..." : "Send Message"}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+
+              {/* Contact Information */}
+              <div className="space-y-6">
+                <Card className="bg-white/5 border-white/10">
+                  <CardHeader>
+                    <CardTitle className="text-white">Research Center</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="flex items-start gap-3">
+                      <MapPin className="h-5 w-5 text-cyan-400 mt-0.5" />
+                      <div>
+                        <div className="font-medium text-white">
+                          Centre for Marine Living Resources and Ecology
+                        </div>
+                        <div className="text-sm text-cyan-200">
+                          Ministry of Earth Sciences
+                          <br />
+                          Kochi, Kerala, India
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Mail className="h-5 w-5 text-cyan-400" />
+                      <div>
+                        <div className="font-medium text-white">heise3nberg@gmail.com</div>
+                        <div className="text-sm text-cyan-200">Admin inquiries</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <Phone className="h-5 w-5 text-cyan-400" />
+                      <div>
+                        <div className="font-medium text-white">+91-484-2390814</div>
+                        <div className="text-sm text-cyan-200">Research collaboration</div>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-400/20">
+                  <CardContent className="p-6">
+                    <h3 className="font-semibold text-white mb-2">Join Our Research Network</h3>
+                    <p className="text-sm text-cyan-200 mb-4">
+                      Collaborate with marine researchers worldwide and contribute to deep sea biodiversity conservation.
+                    </p>
+                    <Button className="bg-gradient-to-r from-cyan-500/20 to-blue-500/20 border-cyan-400/30 hover:from-cyan-400/30 hover:to-blue-400/30 text-white">
+                      Apply for Access
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+          </GlassmorphismCard>
         </div>
       </div>
     </div>

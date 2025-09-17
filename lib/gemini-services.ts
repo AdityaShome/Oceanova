@@ -303,6 +303,7 @@ export class GeminiAIService {
     console.log("[DEBUG] Normalized text:", normalized)
     
     // Try to extract species name from various patterns
+
     const species = this.extractValue(normalized, "species") || 
                    this.extractValue(normalized, "Species") || 
                    this.extractValue(normalized, "species name") ||
@@ -327,6 +328,7 @@ export class GeminiAIService {
                           this.extractValue(normalized, "taxonomic") ||
                           species
   
+
     // If we still don't have a species, try to extract from the first line
     const finalSpecies = species === "Unknown Species" ? 
       normalized.split('\n')[0]?.trim().substring(0, 50) || "Unknown Marine Species" : 
@@ -398,6 +400,7 @@ export class GeminiAIService {
                   this.extractValue(normalized, "common name") ||
                   this.extractValue(normalized, "Common Name") ||
                   finalSpecies,
+
       classification,
       habitat: this.summarizeToSentences(
                  this.extractValue(normalized, "habitat") || 
@@ -418,6 +421,7 @@ export class GeminiAIService {
                this.extractList(normalized, "Known Threats") ||
                this.extractList(normalized, "known threats") ||
                this.extractList(normalized, "risks") ||
+
                [],
       description: this.buildDescription(
                     normalized,
@@ -777,6 +781,7 @@ export class GeminiAIService {
     return "low"
   }
 
+
   private static buildDescription(normalized: string, base: string): string {
     const cleaned = base.replace(/[_#*]+/g, "").trim()
     if (cleaned.length >= 120) return cleaned
@@ -792,4 +797,5 @@ export class GeminiAIService {
     return cleaned ? `${cleaned} ${summary}` : summary
   }
 }
+
 

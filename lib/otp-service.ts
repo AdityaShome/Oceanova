@@ -26,8 +26,6 @@ export function storeOTP(email: string, otp: string, type: 'registration' | 'log
     type,
     userData,
   });
-  
-  // Clean up expired OTPs
   cleanupExpiredOTPs();
 }
 
@@ -52,8 +50,6 @@ export function verifyOTP(email: string, inputOTP: string): { success: boolean; 
     storedOTP.attempts += 1;
     return { success: false, message: 'Invalid OTP' };
   }
-  
-  // OTP is valid
   const userData = storedOTP.userData;
   otpStorage.delete(email);
   
@@ -77,5 +73,4 @@ function cleanupExpiredOTPs(): void {
   }
 }
 
-// Clean up expired OTPs every 5 minutes
 setInterval(cleanupExpiredOTPs, 5 * 60 * 1000);

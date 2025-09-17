@@ -46,6 +46,7 @@
     "@sveltejs/kit": "latest",
     "@types/leaflet": "^1.9.20",
     "@types/leaflet.heat": "^0.2.5",
+
     "@types/nodemailer": "^7.0.1",
     "@vercel/analytics": "latest",
     "autoprefixer": "^10.4.20",
@@ -58,6 +59,7 @@
     "embla-carousel-react": "latest",
     "gcp-metadata": "latest",
     "geist": "latest",
+    "google-auth-library": "^10.3.0",
     "input-otp": "latest",
     "jsonwebtoken": "^9.0.2",
     "kerberos": "latest",
@@ -91,6 +93,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.1.9",
+
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.18.1",
     "@types/react": "^18.3.24",

@@ -7,7 +7,9 @@ export default function TryPage() {
 			<VideoBackground />
 			
 			{/* Animated header with floating data metrics */}
+
 			<div className="absolute top-0 left-0 right-0 h-32 z-20">
+
 				<div className="relative w-full h-full">
 					{/* Flowing data streams */}
 					<div className="absolute inset-0 overflow-hidden">
@@ -25,6 +27,7 @@ export default function TryPage() {
 								}}
 							/>
 						))}
+
 					</div>
 
 					{/* Floating research metrics */}
@@ -346,6 +349,7 @@ export default function TryPage() {
 									<h2 className="text-xl font-semibold text-cyan-100">Species Identification</h2>
 								</div>
 								<p className="text-sm text-cyan-200/80">
+
 									Upload images to identify species using computer vision models and access
 									confidence scores.
 								</p>
@@ -354,12 +358,14 @@ export default function TryPage() {
 						
 						<div className="relative group">
 							<div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-teal-400/10 rounded-xl blur-xl animate-pulse"></div>
+
 							<div className="relative rounded-xl border border-blue-400/20 bg-slate-900/40 backdrop-blur-sm p-6 shadow-sm hover:border-blue-400/40 transition-all duration-300">
 								<div className="flex items-center space-x-3 mb-3">
 									<div className="w-3 h-3 rounded-full bg-blue-400 animate-pulse"></div>
 									<h2 className="text-xl font-semibold text-blue-100">Conservation Insights</h2>
 								</div>
 								<p className="text-sm text-blue-200/80">
+
 									AI-assisted recommendations for conservation strategies driven by
 									spatial and temporal data.
 								</p>
@@ -368,12 +374,14 @@ export default function TryPage() {
 						
 						<div className="relative group">
 							<div className="absolute inset-0 bg-gradient-to-r from-teal-400/10 to-cyan-400/10 rounded-xl blur-xl animate-pulse"></div>
+
 							<div className="relative rounded-xl border border-teal-400/20 bg-slate-900/40 backdrop-blur-sm p-6 shadow-sm hover:border-teal-400/40 transition-all duration-300">
 								<div className="flex items-center space-x-3 mb-3">
 									<div className="w-3 h-3 rounded-full bg-teal-400 animate-pulse"></div>
 									<h2 className="text-xl font-semibold text-teal-100">Water Quality Analysis</h2>
 								</div>
 								<p className="text-sm text-teal-200/80">
+
 									Visualize water quality metrics and hotspots with interactive maps and
 									model-based predictions.
 								</p>
@@ -382,12 +390,14 @@ export default function TryPage() {
 						
 						<div className="relative group">
 							<div className="absolute inset-0 bg-gradient-to-r from-cyan-400/10 to-blue-400/10 rounded-xl blur-xl animate-pulse"></div>
+
 							<div className="relative rounded-xl border border-cyan-400/20 bg-slate-900/40 backdrop-blur-sm p-6 shadow-sm hover:border-cyan-400/40 transition-all duration-300">
 								<div className="flex items-center space-x-3 mb-3">
 									<div className="w-3 h-3 rounded-full bg-cyan-400 animate-pulse"></div>
 									<h2 className="text-xl font-semibold text-cyan-100">Gene Sequence Analysis</h2>
 								</div>
 								<p className="text-sm text-cyan-200/80">
+
 									Analyze genetic sequences to predict functional annotations and
 									potential threats.
 								</p>
@@ -395,9 +405,11 @@ export default function TryPage() {
 						</div>
 					</div>
 
+
 					<div className="relative mb-16">
 						{/* Outer glow ring */}
 						<div className="absolute inset-0 -m-4">
+
 							<div
 								className="w-full h-full rounded-full bg-gradient-to-r from-cyan-400/20 via-blue-500/20 to-teal-400/20 blur-2xl animate-pulse"
 								style={{ animationDuration: "3s" }}
@@ -405,24 +417,30 @@ export default function TryPage() {
 						</div>
 
 						{/* Middle glow */}
+
 						<div className="absolute inset-0 -m-2">
+
 							<div
 								className="w-full h-full rounded-full bg-gradient-to-r from-cyan-400/30 to-blue-500/30 blur-xl animate-pulse"
 								style={{ animationDuration: "2s", animationDelay: "0.5s" }}
 							></div>
 						</div>
 
+
 						{/* Button - keeping your original link */}
 						<Link
 							href="/auth/login"
 							className="relative inline-flex items-center px-16 py-6 text-xl font-bold text-white bg-gradient-to-r from-cyan-500 via-blue-600 to-teal-500 rounded-full shadow-2xl hover:from-cyan-400 hover:via-blue-500 hover:to-teal-400 transition-all duration-500 transform hover:scale-110 hover:shadow-cyan-500/30 focus:outline-none focus:ring-4 focus:ring-cyan-500/50 group overflow-hidden"
+
 						>
 							{/* Button inner glow */}
 							<div className="absolute inset-0 bg-gradient-to-r from-white/10 via-white/5 to-white/10 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 
+
 							<span className="relative mr-4 tracking-wide">Get started</span>
 							<svg
 								className="relative w-6 h-6 transition-transform duration-300 group-hover:translate-x-2 group-hover:scale-110"
+
 								fill="none"
 								stroke="currentColor"
 								viewBox="0 0 24 24"

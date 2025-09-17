@@ -102,6 +102,7 @@ export function SpeciesRecognitionSystem() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: 'include',
         body: JSON.stringify({
           imageData: selectedImage,
           additionalContext: additionalContext || undefined,
@@ -113,6 +114,7 @@ export function SpeciesRecognitionSystem() {
 
       const data = await response.json()
       if (!response.ok) {
+
         throw new Error(data?.error || "Failed to analyze image")
       }
 
@@ -452,3 +454,4 @@ export function SpeciesRecognitionSystem() {
     </div>
   )
 }
+

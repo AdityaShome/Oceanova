@@ -4,11 +4,14 @@ import { useRouter } from "next/navigation";
 import { VideoBackground } from "@/components/video-background";
 import { useState } from "react";
 import { Mail, Lock, LogIn } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
+import { GoogleSignInButton } from "@/components/google-signin-button";
 
 export default function LoginPage() {
 	const router = useRouter();
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [showPassword, setShowPassword] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
@@ -89,16 +92,26 @@ export default function LoginPage() {
 								<label htmlFor="password" className="text-sm font-medium">
 									Password
 								</label>
-								<input
-									id="password"
-									name="password"
-									type="password"
-									required
-									value={password}
-									onChange={(e) => setPassword(e.target.value)}
-									placeholder="Enter your password"
-									className="w-full rounded-md border bg-background/60 px-3 py-2 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-cyan-400"
-								/>
+								<div className="relative">
+									<input
+										id="password"
+										name="password"
+										type={showPassword ? "text" : "password"}
+										required
+										value={password}
+										onChange={(e) => setPassword(e.target.value)}
+										placeholder="Enter your password"
+										className="w-full rounded-md border bg-background/60 px-3 py-2 pr-10 text-sm outline-none ring-offset-background focus-visible:ring-2 focus-visible:ring-cyan-400"
+									/>
+									<button
+										type="button"
+										aria-label={showPassword ? "Hide password" : "Show password"}
+										onClick={() => setShowPassword(!showPassword)}
+										className="absolute right-2 top-1/2 -translate-y-1/2 text-white/70 hover:text-white"
+									>
+										{showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+									</button>
+								</div>
 							</div>
 
 							<button
@@ -118,6 +131,9 @@ export default function LoginPage() {
 									</>
 								)}
 							</button>
+							<div className="mt-3">
+								<GoogleSignInButton label="Sign in with Google" />
+							</div>
 						</div>
 					</div>
 				</form>

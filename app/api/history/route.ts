@@ -4,7 +4,6 @@ import { getUserFromCookies, getUserFromAuthHeader } from "@/lib/auth";
 
 export async function GET(request: NextRequest) {
   try {
-    // Try cookies first (browser), then Authorization header (programmatic)
     const cookieUser = getUserFromCookies();
     const headerUser = getUserFromAuthHeader(request.headers.get("authorization"));
     const user = cookieUser || headerUser;
