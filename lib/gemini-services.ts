@@ -327,7 +327,6 @@ export class GeminiAIService {
                           this.extractValue(normalized, "binomial") ||
                           this.extractValue(normalized, "taxonomic") ||
                           species
-  
 
     // If we still don't have a species, try to extract from the first line
     const finalSpecies = species === "Unknown Species" ? 
@@ -400,28 +399,35 @@ export class GeminiAIService {
                   this.extractValue(normalized, "common name") ||
                   this.extractValue(normalized, "Common Name") ||
                   finalSpecies,
-
-      classification,
-      habitat: this.summarizeToSentences(
-                 this.extractValue(normalized, "habitat") || 
-                 this.extractValue(normalized, "Habitat") || 
-                 this.extractValue(normalized, "environment") ||
-                 this.extractValue(normalized, "depth") ||
-                 "Marine environment",
-                 2
-               ),
-      conservationStatus: this.extractValue(normalized, "conservation") || 
-                         this.extractValue(normalized, "Conservation") || 
-                         this.extractValue(normalized, "status") ||
-                         this.extractValue(normalized, "threatened") ||
+      classification: {
+        kingdom: this.extractValue(text, "kingdom") || 
+                 this.extractValue(text, "Kingdom") || 
+                 this.extractValue(text, "Animalia") || "",
+        phylum: this.extractValue(text, "phylum") || 
+                this.extractValue(text, "Phylum") || 
+                this.extractValue(text, "Chordata") || "",
+        class: this.extractValue(text, "class") || 
+               this.extractValue(text, "Class") || "",
+        order: this.extractValue(text, "order") || 
+               this.extractValue(text, "Order") || "",
+        family: this.extractValue(text, "family") || 
+                this.extractValue(text, "Family") || "",
+        genus: this.extractValue(text, "genus") || 
+               this.extractValue(text, "Genus") || "",
+      },
+      habitat: this.extractValue(text, "habitat") || 
+               this.extractValue(text, "Habitat") || 
+               this.extractValue(text, "environment") ||
+               this.extractValue(text, "depth") ||
+               "Marine environment",
+      conservationStatus: this.extractValue(text, "conservation") || 
+                         this.extractValue(text, "Conservation") || 
+                         this.extractValue(text, "status") ||
+                         this.extractValue(text, "threatened") ||
                          "Unknown",
-      threats: this.extractList(normalized, "threats") || 
-               this.extractList(normalized, "Threats") || 
-               this.extractList(normalized, "Known Threats to this Species") ||
-               this.extractList(normalized, "Known Threats") ||
-               this.extractList(normalized, "known threats") ||
-               this.extractList(normalized, "risks") ||
-
+      threats: this.extractList(text, "threats") || 
+               this.extractList(text, "Threats") || 
+               this.extractList(text, "risks") ||
                [],
       description: this.buildDescription(
                     normalized,
@@ -780,8 +786,6 @@ export class GeminiAIService {
     if (lower.includes("moderate")) return "moderate"
     return "low"
   }
-
-
   private static buildDescription(normalized: string, base: string): string {
     const cleaned = base.replace(/[_#*]+/g, "").trim()
     if (cleaned.length >= 120) return cleaned
@@ -797,5 +801,4 @@ export class GeminiAIService {
     return cleaned ? `${cleaned} ${summary}` : summary
   }
 }
-
 

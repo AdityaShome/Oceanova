@@ -5,10 +5,11 @@ import { GeistMono } from "geist/font/mono"
 import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { BubbleCursor } from "@/components/bubble-cursor"
+import { NavigationWrapper } from "@/components/navigation-wrapper"
+import { FloatingUpgradeButton } from "@/components/floating-upgrade-button"
 
 import { DeepSeaBackground } from "@/components/deep-sea-background"
 import { Chatbot } from "@/components/chatbot"
-
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -36,10 +37,13 @@ export default function RootLayout({
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <DeepSeaBackground />
         <BubbleCursor />
+        <Suspense fallback={<div>Loading...</div>}>
+          <NavigationWrapper>{children}</NavigationWrapper>
+        </Suspense>
+        <FloatingUpgradeButton />
         <Suspense fallback={<div>Loading...</div>}>{children}</Suspense>
 
         <Chatbot />
-
         <Analytics />
       </body>
     </html>

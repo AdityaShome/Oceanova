@@ -13,11 +13,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "Missing email or password" }, { status: 400 })
     }
 
+    // Normalize email to avoid case/whitespace mismatches
+    const normalizedEmail = String(email).trim().toLowerCase()
+
     const users = await getUserCollection()
-    const user = await users.findOne({ email })
+    const user = await users.findOne({ email: normalizedEmail })
 
     if (!user) {
       return NextResponse.json({ message: "Invalid credentials" }, { status: 401 })
+    }
+
+    // If the account was created via Google Sign-In, there may be no password
+    if (!user.password) {
+      return NextResponse.json({ message: "This account uses Google Sign-In. Please sign in with Google or reset your password." }, { status: 400 })
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password)
