@@ -9,7 +9,7 @@ export async function GET(req: Request) {
 
     // Extract token from cookies
     const cookieHeader = req.headers.get("cookie");
-    console.log("Cookie header:", cookieHeader);
+    console.log("Cookie header:");
     
     if (!cookieHeader) {
       return NextResponse.json({ 
